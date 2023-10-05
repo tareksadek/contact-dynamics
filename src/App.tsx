@@ -1,21 +1,15 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import CreateAccount from './containers/Auth/CreateAccount';
-import ProfilePage from './containers/Profile/Profile';
-import Landing from './containers/Landing/Landing'; 
+import ErrorBoundary from './hoc/ErrorBoundary';
+import AppThemeProvider from './providers/AppThemeProvider';
+import AppContent from './containers/AppContent/AppContent';
 
-const App: React.FC = () => {
+const App: React.FC = () => {  
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/create-account" element={<CreateAccount />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        {/* You can add more routes as needed */}
-      </Routes>
-    </Router>
+    <ErrorBoundary fallback={<h1>Something went wrong.</h1>}>
+      <AppThemeProvider>
+        <AppContent />
+      </AppThemeProvider>
+    </ErrorBoundary>
   );
 }
 

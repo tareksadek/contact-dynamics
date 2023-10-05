@@ -1,0 +1,11 @@
+{
+  "projects": {
+    "default": "contact-dyn"
+  },
+  "targets": {},
+  "etags": {
+    "contact-dyn": {
+      "extensionInstances": {}
+    }
+  }
+}

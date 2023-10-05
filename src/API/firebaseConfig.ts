@@ -1,21 +1,29 @@
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
-import 'firebase/compat/firestore';
+import { initializeApp } from '@firebase/app';
+import { getAuth } from '@firebase/auth';
+import { getStorage } from '@firebase/storage';
+import { getFunctions } from '@firebase/functions';
 
+import { 
+  initializeFirestore, 
+  persistentLocalCache,
+  persistentSingleTabManager, 
+  CACHE_SIZE_UNLIMITED 
+} from '@firebase/firestore';
+import { firebaseConfig } from '../setup/setup';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB-stW8owazSZN32MxxVbIC3PKorkArTNs",
-  authDomain: "contact-dyn.firebaseapp.com",
-  projectId: "contact-dyn",
-  storageBucket: "contact-dyn.appspot.com",
-  messagingSenderId: "474249793616",
-  appId: "1:474249793616:web:598f22bac776977bc5c155",
-  measurementId: "G-CWTBTGYM9D"
-};
+const firebaseApp = initializeApp(firebaseConfig);
 
-const firebaseApp = firebase.initializeApp(firebaseConfig)
+export const auth = getAuth(firebaseApp);
 
-export const auth = firebaseApp.auth()
-export const firestore = firebaseApp.firestore();
+export const firestore = initializeFirestore(firebaseApp, {
+  localCache: persistentLocalCache({
+    cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+    tabManager: persistentSingleTabManager({})
+  })
+});
+
+export const storage = getStorage(firebaseApp);
+
+export const functions = getFunctions(firebaseApp);
 
 export default firebaseApp;

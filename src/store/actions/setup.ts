@@ -1,32 +1,9 @@
 import * as actionTypes from './actionTypes';
+import { setNotification } from './notificationCenter';
 import { fetchDefaultSetup } from '../../API/setup';
 import { defaults } from '../../setup/setup';
-
-// Define Setup Data Type
-export interface StaticSetup {
-  withInvitations: boolean;
-  withMultipleProfiles: boolean;
-  withSubscription: boolean;
-  trialPeriod: null | number;
-  withTeams: boolean;
-  withPrivacyKey: boolean;
-  withImpact: boolean;
-  withRewards: boolean;
-}
-
-export interface FetchedSetup {
-  crmExports: Array<object>;
-  embedForms: Array<object>;
-  rewardsMilestones: Array<object>;
-  socialPlatforms: Array<object>;
-  themeDefaults: {
-    color: string;
-    theme: string;
-    layout: string;
-  };
-}
-
-export type SetupData = StaticSetup & FetchedSetup;
+import { StaticSetup, FetchedSetup, SetupType } from '../../types/setup';
+import { startLoading, stopLoading } from './loadingCenter';
 
 // Action Interfaces
 interface FetchSetupRequestAction {
@@ -35,7 +12,7 @@ interface FetchSetupRequestAction {
 
 interface FetchSetupSuccessAction {
   type: typeof actionTypes.FETCH_SETUP_SUCCESS;
-  payload: SetupData;
+  payload: SetupType;
 }
 
 interface FetchSetupFailureAction {
@@ -45,7 +22,7 @@ interface FetchSetupFailureAction {
 
 interface UpdateSetupAction {
   type: typeof actionTypes.UPDATE_SETUP;
-  payload: SetupData;
+  payload: SetupType;
 }
 
 export type SetupActionTypes = FetchSetupRequestAction | FetchSetupSuccessAction | FetchSetupFailureAction | UpdateSetupAction;
@@ -55,7 +32,7 @@ export const fetchSetupRequest = (): FetchSetupRequestAction => ({
   type: actionTypes.FETCH_SETUP_REQUEST
 });
 
-export const fetchSetupSuccess = (setupData: SetupData): FetchSetupSuccessAction => ({
+export const fetchSetupSuccess = (setupData: SetupType): FetchSetupSuccessAction => ({
   type: actionTypes.FETCH_SETUP_SUCCESS,
   payload: setupData
 });
@@ -66,21 +43,25 @@ export const fetchSetupFailure = (error: string): FetchSetupFailureAction => ({
 });
 
 export const fetchSetup = () => async (dispatch: any) => {
+  dispatch(startLoading('Loading setup...'));
   dispatch(fetchSetupRequest());
   try {
     const firestoreSetupData = await fetchDefaultSetup();
-    const combinedSetupData: SetupData = {
+    const combinedSetupData: SetupType = {
       ...defaults as StaticSetup,
       ...firestoreSetupData as FetchedSetup
     };
-    dispatch(fetchSetupSuccess(combinedSetupData as SetupData));
+    dispatch(fetchSetupSuccess(combinedSetupData as SetupType));
+    dispatch(stopLoading());
   } catch (err) {
     dispatch(fetchSetupFailure((err as Error).message));
+    dispatch(stopLoading());
+    dispatch(setNotification({ message: 'Failed to load setup data', type: 'error', horizontal: 'right', vertical: 'top' }));
   }
 };
 
 // Update setup
-export const updateSetup = (updatedSetupData: SetupData): UpdateSetupAction => ({
+export const updateSetup = (updatedSetupData: SetupType): UpdateSetupAction => ({
   type: actionTypes.UPDATE_SETUP,
   payload: updatedSetupData
 });

@@ -10,13 +10,14 @@ import {
   FetchSetupSuccessAction,
   FetchSetupFailureAction,
   UpdateSetupAction,
-  SetupData,
 } from '../actions/setup';
+
+import { SetupType } from '../../types/setup'
 
 import { updateObj } from '../../utilities/utils';
 
 const initialState: {
-  setup: SetupData | null;
+  setup: SetupType | null;
   loading: boolean;
   error: string | null;
 } = {
