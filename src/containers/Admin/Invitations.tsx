@@ -120,6 +120,7 @@ const Invitations: React.FC = () => {
           batchId={batchId}
           invitationId={params.row.id as string} 
           used={params.row.used}
+          usedBy={params.row.usedBy}
           openQrDrawer={handleQrClick}
         />
       ),

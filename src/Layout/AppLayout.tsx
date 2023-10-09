@@ -11,6 +11,7 @@ import { RootState } from '../store/reducers';
 import { useLocation } from 'react-router-dom';
 import { openModal, closeMenu } from '../store/actions/modal';
 import ProfileSwitcherDialog from './ProfileSwitcherDialog';
+import { appStyles } from './appStyles';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -18,7 +19,8 @@ interface AppLayoutProps {
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children, theme }) => {
-  const dispatch = useDispatch();
+  const classes = appStyles();
+  const dispatch = useDispatch();  
 
   const openModalName = useSelector((state: RootState) => state.modal.openModal);
 
@@ -59,7 +61,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, theme }) => {
   }, [dispatch, isSideMenuOpen]);
 
   return (
-    <Box>
+    <Box className={classes.mainBox}>
       {!isDefaultProfile && (
         <AppHeader
           userUrlSuffix={currentUser ? currentUser.profileUrlSuffix : null}

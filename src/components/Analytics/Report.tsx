@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import { LinkType } from '../../types/profile';
+import { ProfileDataType } from '../../types/profile';
 import EfficiencyReport from './EfficiencyReport';
 import LinksReport from './LinksReport';
 import VisitsReport from './VisitsReport';
@@ -18,6 +19,8 @@ type ReportProps = {
     social: LinkType[];
     custom: LinkType[];
   } | null;
+  userId?: string | null;
+  profile?: ProfileDataType | null;
 };
 
 const Report: React.FC<ReportProps> = ({
@@ -26,6 +29,8 @@ const Report: React.FC<ReportProps> = ({
   visits,
   addedToContacts,
   links,
+  userId,
+  profile,
 }) => {
   return (
     <Box>
@@ -42,7 +47,10 @@ const Report: React.FC<ReportProps> = ({
         />
       )}
       {sections.visits && (
-        <VisitsReport />
+        <VisitsReport
+          selectedUserId={userId}
+          selectedUserProfile={profile}
+        />
       )}
     </Box>
   );

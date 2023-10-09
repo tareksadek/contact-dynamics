@@ -31,7 +31,7 @@ const User: React.FC = () => {
   }), [user?.invitationId, user?.batchId]);  
 
   useEffect(() => {
-    if (!user) {
+    if (!user || (user && user.id !== userId)) {
       dispatch(fetchUser(userId));
     }
   }, [userId, dispatch, user]);
@@ -48,15 +48,28 @@ const User: React.FC = () => {
     }
   }
 
-  const deleteUser = () => {
+  const viewContacts = () => {
     if (user) {
-      dispatch(resetInvitation(user.batchId, user.invitationId))
+      navigate(`/users/${user.id}/contacts`)
+    }
+  }
+
+  const deleteUser = () => {
+    let message = 'Deleting a user will remove all user data and reset the related invitation. Continue?';
+
+    if (!window.confirm(message)) {
+      return;
+    }
+    if (user) {
+      dispatch(resetInvitation(user.batchId, user.invitationId, userId))
       navigate('/users')
     }
   }
 
   return (
     <div>
+      <Button onClick={viewProfile}>View Profile</Button>
+      <Button onClick={viewContacts}>View Contacts</Button>
       <Button
         variant="contained"
         color="primary"
@@ -86,7 +99,6 @@ const User: React.FC = () => {
                 <div ref={qrCodeRef}></div>
               </ListItem>
               <ListItem>
-                <Button onClick={viewProfile}>View Profile</Button>
                 <Button onClick={() => qrCode.download({
                     extension: "svg",
                     name: `${user.firstName}_${user.lastName}`

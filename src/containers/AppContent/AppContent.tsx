@@ -36,14 +36,16 @@ import Invitations from '../Admin/Invitations';
 import CreateBatch from '../Admin/CreateBatch';
 import Users from '../Admin/users';
 import User from '../Admin/User';
+import UserContacts from '../Admin/UserContacts'
+import UserAnalytics from '../Admin/UserAnalytics';
 import Logout from '../Auth/Logout';
-
 import MakeAdmin from './MakeA';
 
 const AppContent: React.FC = () => {
   const { theme } = useTheme();
   const currentTheme = theme === 'light' ? lightTheme : darkTheme;  
-
+  console.log(theme);
+  
   return (
       <SubmitProvider>
         <MUIThemeProvider theme={currentTheme}>
@@ -77,6 +79,8 @@ const AppContent: React.FC = () => {
                 <Route path="/batches/:batchId/invitations" element={<AdminProtectedWrapper><Invitations /></AdminProtectedWrapper>} />
                 <Route path="/users" element={<AdminProtectedWrapper><Users /></AdminProtectedWrapper>} />
                 <Route path="/users/:userId" element={<AdminProtectedWrapper><User /></AdminProtectedWrapper>} />
+                <Route path="/users/:userId/contacts" element={<AdminProtectedWrapper><UserContacts /></AdminProtectedWrapper>} />
+                <Route path="/users/:userId/analytics" element={<AdminProtectedWrapper><UserAnalytics /></AdminProtectedWrapper>} />
 
                 <Route path="/activate" element={<InvitationValidator />} />
                 <Route path="/logout" element={<Logout />} />

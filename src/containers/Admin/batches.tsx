@@ -26,6 +26,10 @@ const Batches: React.FC = () => {
     navigate('/createBatch')
   }
 
+  const handleViewInvitations = (id: string) => {
+    navigate(`/batches/${id}/invitations`)
+  }
+
   const columns: GridColDef[] = [
     { field: 'title', headerName: 'Batch Title', width: 200 },
     { field: 'createdOn', headerName: 'Created On', width: 200 },
@@ -54,7 +58,7 @@ const Batches: React.FC = () => {
           batchId={params.row.id as string} 
           onEdit={(id) => console.log(`Edit ${id}`)}
           onDelete={(id) => console.log(`Delete ${id}`)}
-          onViewInvitations={(id) => { navigate(`/batches/${id}/invitations`); }}
+          onViewInvitations={(id) => handleViewInvitations(id)}
         />
       ),
     }
@@ -84,11 +88,16 @@ const Batches: React.FC = () => {
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 5,
+                pageSize: 25,
               },
             },
           }}
           pageSizeOptions={[5, 10, 25, 50, 100]}
+          onCellClick={(params) => {
+            if (params.field !== 'actions') {
+              handleViewInvitations(params.row.id as string);
+            }
+          }}
         />
       </div>
     );

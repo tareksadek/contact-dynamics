@@ -6,15 +6,27 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import { getVisitsForLast30Days } from '../../API/profile';
 import { RootState } from '../../store/reducers';
 import { VisitType } from '../../types/profile';
+import { ProfileDataType } from '../../types/profile';
+
+type VisitsReportProps = {
+  selectedUserId?: string | null;
+  selectedUserProfile?: ProfileDataType | null;
+};
 
 const TimePeriods = {
   THIS_WEEK: 'This Week',
   THIS_MONTH: 'This Month',
 };
 
-const VisitsReport = () => {
+const VisitsReport: React.FC<VisitsReportProps> = ({
+  selectedUserId,
+  selectedUserProfile
+}) => {
   const user = useSelector((state: RootState) => state.user.user);
-  const profile = useSelector((state: RootState) => state.profile.profile);
+  const stateProfile = useSelector((state: RootState) => state.profile.profile);
+
+  const profile = selectedUserProfile || stateProfile
+  const userId = selectedUserId || user?.id
 
   const [selectedPeriod, setSelectedPeriod] = useState(TimePeriods.THIS_WEEK);
   const [visitsData, setVisitsData] = useState<{ visitedOn: string; count: number; userId: string; profileId: string }[]>([]);
@@ -45,8 +57,8 @@ const VisitsReport = () => {
     const fetchVisits = async () => {
       setLoading(true); 
   
-      if (user && user.id && profile && profile.id) {
-        const rawData = await getVisitsForLast30Days(user.id, profile.id);
+      if (userId && profile && profile.id) {
+        const rawData = await getVisitsForLast30Days(userId, profile.id);
         const data: VisitType[] = rawData.map((doc: any) => ({
           userId: doc.userId,
           profileId: doc.profileId,
@@ -56,7 +68,7 @@ const VisitsReport = () => {
         const transformedData = groupVisitsByDate(data);
         const enrichedTransformedData = transformedData.map(item => ({
           ...item,
-          userId: user.id,
+          userId: userId,
           profileId: profile.id || ''
         }));
   
@@ -67,7 +79,7 @@ const VisitsReport = () => {
           const weekDataAggregated = groupVisitsByDate(weekData);
           setVisitsData(weekDataAggregated.map(item => ({
             ...item,
-            userId: user.id,
+            userId: userId,
             profileId: profile.id || ''
           })));
         } else if (selectedPeriod === TimePeriods.THIS_MONTH) {
@@ -79,7 +91,7 @@ const VisitsReport = () => {
     };
   
     fetchVisits();
-  }, [selectedPeriod, user, profile]);
+  }, [selectedPeriod, userId, profile]);
   
   
 
@@ -102,15 +114,19 @@ const VisitsReport = () => {
             <Button onClick={() => setSelectedPeriod(TimePeriods.THIS_WEEK)}>{TimePeriods.THIS_WEEK}</Button>
             <Button onClick={() => setSelectedPeriod(TimePeriods.THIS_MONTH)}>{TimePeriods.THIS_MONTH}</Button>
           </Box>
-          <Box mt={2} width={500} height={300}>
-            <LineChart width={500} height={300} data={visitsData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="visitedOn" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#8884d8" activeDot={{ r: 8 }} />
-            </LineChart>
-          </Box>
+          {visitsData && visitsData.length === 0 ? (
+            <div>Not enough data to draw visits chart</div>
+          ) : (
+            <Box mt={2} width={500} height={300}>
+              <LineChart width={500} height={300} data={visitsData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="visitedOn" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="count" stroke="#8884d8" activeDot={{ r: 8 }} />
+              </LineChart>
+            </Box>
+          )}
         </>
       )}
     </Box>

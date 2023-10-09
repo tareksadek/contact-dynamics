@@ -94,6 +94,7 @@ export type ProfileDataType = {
   addedToContacts?: number | null;
   visits?: number | null;
   id?: string | null;
+  userId?: string | null;
 }
 
 export type profileExtractType = {

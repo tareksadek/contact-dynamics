@@ -50,6 +50,22 @@ const deleteProfilesAndSubcollections = async (userRef: any) => {
   }
 }
 
+const deleteUserImagesFromStorage = async (userId: string) => {
+  try {
+    const userDirectory = `users/${userId}/`;
+    const bucket = admin.storage().bucket(); // Use default bucket. Replace with bucket name string if you have a different bucket.
+
+    const [files] = await bucket.getFiles({ prefix: userDirectory });
+
+    const deletePromises = files.map(file => file.delete());
+    await Promise.all(deletePromises);
+
+  } catch (error) {
+    console.error('Error while deleting user images from storage:', error);
+    throw new Error('Failed to delete user images from storage.');
+  }
+}
+
 const resetInvitationData = async (batchId: string, invitationId: string) => {
   const invitationRef = admin.firestore().doc(`batches/${batchId}/invitations/${invitationId}`);
 
@@ -69,10 +85,24 @@ const resetInvitationData = async (batchId: string, invitationId: string) => {
 };
 
 exports.deleteUserData = functions.https.onCall(async (data, context) => {
-  const userId = data.userId;  // Extracting userId from the data payload
+  const userId = data.userId;
 
+  // Check if the user is authenticated
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'Only authenticated users can delete user data.');
+  }
+
+  // Check if the user has the admin claim
+  if (!context.auth.token.admin) {
+    throw new functions.https.HttpsError('permission-denied', 'Only admins can delete user data.');
+  }
+
+  // 1. Delete the user from Firebase Authentication
+  try {
+    await admin.auth().deleteUser(userId);
+  } catch (error) {
+    console.error('Error deleting user from Firebase Authentication:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to delete user from Firebase Authentication.');
   }
 
   const userRef = admin.firestore().doc(`users/${userId}`);
@@ -88,6 +118,9 @@ exports.deleteUserData = functions.https.onCall(async (data, context) => {
       await resetInvitationData(batchDoc.id, invitationDoc.id);
     }
   }
+
+  // Delete images from the storage
+  await deleteUserImagesFromStorage(userId)
 
   // Finally, delete the main user document
   await userRef.delete();

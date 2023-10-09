@@ -3,8 +3,8 @@ import { IconButton, Menu, MenuItem } from '@mui/material';
 import { MoreVert as MoreVertIcon } from '@mui/icons-material';
 
 interface ContactActionsProps {
-  onEdit: (contactId: string) => void;
-  onDelete: (contactId: string) => void;
+  onEdit?: ((contactId: string) => void) | null;
+  onDelete?: ((contactId: string) => void) | null;
   onViewDetails: (contactId: string) => void;
   onAddToContacts: (contactId: string) => void;
   contactId: string;
@@ -56,18 +56,22 @@ const ContactActions: React.FC<ContactActionsProps> = ({
         }}>
           View details
         </MenuItem>
-        <MenuItem onClick={() => {
-          onEdit(contactId);
-          handleClose();
-        }}>
-          Edit contact
-        </MenuItem>
-        <MenuItem onClick={() => {
-          onDelete(contactId);
-          handleClose();
-        }}>
-          Delete
-        </MenuItem>
+        {onEdit && (
+          <MenuItem onClick={() => {
+            onEdit(contactId);
+            handleClose();
+          }}>
+            Edit contact
+          </MenuItem>
+        )}
+        {onDelete && (
+          <MenuItem onClick={() => {
+            onDelete(contactId);
+            handleClose();
+          }}>
+            Delete
+          </MenuItem>
+        )}
       </Menu>
     </>
   );

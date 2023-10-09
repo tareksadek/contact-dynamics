@@ -9,6 +9,7 @@ import { getUsers } from '../../store/actions/users';
 import UserActions from '../../components/Admin/UserActions';
 import { AppDispatch, RootState } from '../../store/reducers';
 import { UserType } from '../../types/user';
+import { resetInvitation } from '../../store/actions/batch';
 
 const Users: React.FC = () => {
   const navigate = useNavigate();
@@ -36,6 +37,21 @@ const Users: React.FC = () => {
 
     setFilteredUsers(filtered || null);
   }, [allUsers, searchValue]);
+
+  const handleViewUser = (userId: string) => {
+    navigate(`/users/${userId}`)
+  }
+
+  const handleDeleteUser = (batchId: string, invitationId: string, usedBy: string) => {
+    let message = 'Deleting a user will remove all user data and reset the related invitation. Continue?';
+
+    if (!window.confirm(message)) {
+      return;
+    }
+    if (usedBy) {
+      dispatch(resetInvitation(batchId, invitationId, usedBy));
+    }
+  };
 
   const columns: GridColDef[] = [
     { field: 'fullName', headerName: 'Name', width: 200 },
@@ -68,9 +84,13 @@ const Users: React.FC = () => {
       width: 150,
       renderCell: (params: GridRowModel) => (
         <UserActions 
+          batchId={params.row.batchId as string}
+          invitationId={params.row.invitationId as string}
           userId={params.row.id as string} 
-          onDelete={(id) => console.log(`Delete ${id}`)}
-          onViewUser={(id) => { navigate(`/users/${id}`); }}
+          onDelete={(batchId, invitationId, usedBy) => { handleDeleteUser(params.row.batchId, params.row.invitationId, params.row.id) }}
+          onViewUser={(id) => { handleViewUser(id) }}
+          onViewUserContacts={(id) => { navigate(`/users/${id}/contacts`); }}
+          onViewUserAnalytics={(id) => { navigate(`/users/${id}/analytics`); }}
         />
       ),
     }
@@ -106,6 +126,11 @@ const Users: React.FC = () => {
             },
           }}
           pageSizeOptions={[5, 10, 25, 50, 100]}
+          onCellClick={(params) => {
+            if (params.field !== 'actions') {
+              handleViewUser(params.row.id as string);
+            }
+          }}
         />
       </div>
     </div>

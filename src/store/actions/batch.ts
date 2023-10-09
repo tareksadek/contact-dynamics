@@ -325,46 +325,47 @@ export const updateBatchTitle = (
 
 export const resetInvitation = (
   batchId: string,
-  invitationId: string
+  invitationId: string,
+  userId: string,
 ) => async (dispatch: any) => {
+  dispatch(startLoading('Processing...'))
   dispatch(resetInvitationRequest());
 
   try {
-    // Fetch the invitation data first to get the userId from usedBy attribute
-    const invitationData = await getInvitationFromBatchById(batchId, invitationId) as InvitationData;
-    const userId = invitationData?.usedBy;
-
-    const { success, error } = await resetInvitationData(batchId, invitationId);
-    
-    if (success) {
-      if (userId) {
-        // Call the Cloud Function to delete user data
-        const deleteUserDataFunction = httpsCallable<DeleteUserRequest, DeleteUserResponse>(functions, 'deleteUserData');
-        const result: HttpsCallableResult<DeleteUserResponse> = await deleteUserDataFunction({ userId });
-        
-        if (!result.data.success) {
-          throw new Error(result.data.error || 'Failed to delete user data.');
-        }
+    if (userId) {
+      // Call the Cloud Function to delete user data
+      const deleteUserDataFunction = httpsCallable<DeleteUserRequest, DeleteUserResponse>(functions, 'deleteUserData');
+      const result: HttpsCallableResult<DeleteUserResponse> = await deleteUserDataFunction({ userId });
+      
+      if (result.data.success) {
+        dispatch(resetInvitationSuccess(batchId, invitationId));
+        dispatch(stopLoading())
+        dispatch(setNotification({ 
+          message: 'Invitation reset and user data deleted successfully.', 
+          type: 'success', 
+          horizontal: 'right', 
+          vertical: 'top' 
+        }));
+      } else {
+        dispatch(resetInvitationFailure('Failed to reset the invitation.'));
+        dispatch(stopLoading())
+        dispatch(setNotification({ 
+          message: 'Failed to reset the invitation.', 
+          type: 'error', 
+          horizontal: 'right', 
+          vertical: 'top' 
+        }));
       }
-
-      dispatch(resetInvitationSuccess(batchId, invitationId));
-      dispatch(setNotification({ 
-        message: 'Invitation reset and user data deleted successfully.', 
-        type: 'success', 
-        horizontal: 'right', 
-        vertical: 'top' 
-      }));
-    } else {
-      dispatch(resetInvitationFailure(error || 'Failed to reset the invitation.'));
-      dispatch(setNotification({ 
-        message: 'Failed to reset the invitation.', 
-        type: 'error', 
-        horizontal: 'right', 
-        vertical: 'top' 
-      }));
     }
   } catch (error) {
     dispatch(resetInvitationFailure((error as Error).message));
+    dispatch(stopLoading())
+    dispatch(setNotification({ 
+      message: 'Failed to reset the invitation.', 
+      type: 'error', 
+      horizontal: 'right', 
+      vertical: 'top' 
+    }));
   }
 };
 

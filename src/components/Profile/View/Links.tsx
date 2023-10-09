@@ -42,7 +42,7 @@ const Links: React.FC<LinksProps> = ({ linksStyles }) => {
         <div>
           <Grid container spacing={2}>
             {links.social.map((link, index) => (
-              <Grid item xs={2} key={link.id}>
+              <Grid item xs={2} key={link.id || index}>
                 <SocialIcon
                   url={link.url}
                   onClick={(e) => {
@@ -61,7 +61,7 @@ const Links: React.FC<LinksProps> = ({ linksStyles }) => {
         <div>
           <Grid container spacing={2}>
             {links.custom.map((link, index) => (
-              <Grid item xs={12} key={link.id}>
+              <Grid item xs={12} key={link.id || index}>
                 <Link
                   href={link.url}
                   target="_blank"

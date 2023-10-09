@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import { resetInvitation } from '../../store/actions/batch';
@@ -12,6 +13,7 @@ interface Props {
   batchId: string;
   invitationId: string;
   used: boolean;
+  usedBy: string | null;
   openQrDrawer: (invitationId: string) => void;
 }
 
@@ -19,9 +21,11 @@ const InvitationActions: React.FC<Props> = ({
   batchId,
   invitationId,
   used,
+  usedBy,
   openQrDrawer,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -33,8 +37,14 @@ const InvitationActions: React.FC<Props> = ({
   };
 
   const handleResetInvitation = () => {
-    // Assuming batchId is accessible from a higher context or passed as a prop
-    dispatch(resetInvitation(batchId, invitationId));
+    let message = 'Resetting an invitation will delete all user data and make the invitation reusable. Continue?';
+
+    if (!window.confirm(message)) {
+      return;
+    }
+    if (usedBy) {
+      dispatch(resetInvitation(batchId, invitationId, usedBy));
+    }
     handleClose();
   };
 
@@ -66,6 +76,12 @@ const InvitationActions: React.FC<Props> = ({
     handleClose();
   };
 
+  const handleViewUser = () => {
+    if (usedBy) {
+      navigate(`/users/${usedBy}`)
+    }
+  }
+
   return (
     <>
       <IconButton
@@ -83,7 +99,7 @@ const InvitationActions: React.FC<Props> = ({
       >
         <MenuItem onClick={handleCopyToClipboard}>Copy Invitation Code</MenuItem> 
         <MenuItem onClick={handleEmailInvitation}>Email Invitation</MenuItem>
-        <MenuItem disabled={!used}>View User</MenuItem>
+        <MenuItem disabled={!used} onClick={handleViewUser}>View User</MenuItem>
         <MenuItem onClick={handleQrDrawer}>View / Download Qr code</MenuItem>
         <MenuItem onClick={handleResetInvitation} disabled={!used}>Reset Invitation</MenuItem>
       </Menu>

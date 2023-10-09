@@ -1,3 +1,5 @@
+import { ContactType } from "./contact";
+
 export type RedirectType = {
   active: boolean;
   url: string | null;
@@ -29,7 +31,8 @@ export interface UserType {
       profileId: string,
       profileTitle: string,
     }
-  ]
+  ],
+  contacts?: ContactType[] | null, 
 }
 
 export interface DeleteUserRequest {
