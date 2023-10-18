@@ -12,6 +12,10 @@ export const getInvitationFromBatchById = async (batchId: string, invitationId: 
 
 		if (invitationDoc.exists()) {
 			const data = invitationDoc.data();
+			if (data && data.expirationDate && typeof data.expirationDate !== 'string') {
+				const timestamp = data.expirationDate as unknown as Timestamp;
+				data.expirationDate = new Date(timestamp.seconds * 1000);
+			}
 			return {
 				id: invitationDoc.id,
 				...data

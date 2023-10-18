@@ -100,9 +100,9 @@ const BasicInfoForm: React.FC<BasicInfoProps> = ({
           />
         )}
       />
-      <Typography color="error">
+      {/* <Typography color="error">
         {errors.firstName && errors.firstName.message}
-      </Typography>
+      </Typography> */}
 
       <Controller
         name="lastName"
@@ -124,9 +124,9 @@ const BasicInfoForm: React.FC<BasicInfoProps> = ({
           />
         )}
       />
-      <Typography color="error">
+      {/* <Typography color="error">
         {errors.lastName && errors.lastName.message}
-      </Typography>
+      </Typography> */}
       
       <Controller
         name="email"
@@ -154,9 +154,9 @@ const BasicInfoForm: React.FC<BasicInfoProps> = ({
           />
         )}
       />
-      <Typography color="error">
+      {/* <Typography color="error">
         {errors.email && errors.email.message}
-      </Typography>
+      </Typography> */}
 
       {appSetup && appSetup.basicInfoData && !appSetup.basicInfoData.organization && !currentUser?.isTeamMember && (
         <Controller

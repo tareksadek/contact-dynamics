@@ -1,7 +1,9 @@
 import React from 'react';
-import { Modal, Typography } from '@mui/material';
+import { Drawer, Typography, Box, IconButton } from '@mui/material';
 import { Timestamp } from '@firebase/firestore';
 import AddContactForm from './AddContactForm';
+import { layoutStyles } from '../../theme/layout';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface ContactModalProps {
   open: boolean;
@@ -11,6 +13,7 @@ interface ContactModalProps {
 }
 
 const AddContactModal: React.FC<ContactModalProps> = ({ open, onClose, onSubmit, loadingData }) => {
+  const layoutClasses = layoutStyles()
   const handleFormSubmit = async (data: any) => {
     const enhancedData = {
       ...data,
@@ -21,16 +24,31 @@ const AddContactModal: React.FC<ContactModalProps> = ({ open, onClose, onSubmit,
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <div style={{ padding: '2rem', maxWidth: '550px', margin: 'auto', backgroundColor: '#fff' }}>
-        <Typography variant="h6">Add new contact</Typography>
+    <Drawer
+      anchor="bottom"
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        className: layoutClasses.radiusBottomDrawer
+      }}
+    >
+      <Box p={2}>
+        <Typography variant="h4" align="center">Add contact</Typography>
         <AddContactForm
           isSave
           loadingData={loadingData}
           onSubmit={handleFormSubmit}
         />
-      </div>
-    </Modal>
+      </Box>
+      <IconButton
+        aria-label="delete"
+        color="primary"
+        className={layoutClasses.drawerCloseButton}
+        onClick={onClose}
+      >
+        <CloseIcon />
+      </IconButton>
+    </Drawer>
   );
 };
 

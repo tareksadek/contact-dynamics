@@ -10,6 +10,7 @@ export const defaults = {
   withRewards: true,
 }
 export const appDomain = 'https://contact-dyn.firebaseapp.com'
+export const appDomainView= 'contactdyn.app'
 export const appDefaultTheme: 'light' | 'dark' = 'light';
 export const appDefaultColor = {
   code: '#888888',
@@ -29,8 +30,8 @@ export const firebaseConfig = {
 export const GOOGLE_MAPS_KEY = process.env.REACT_APP_GOOGLE_MAPS
 export const socialPlatforms = [
   /* eslint-disable object-curly-newline */
-  { platform: 'website', color: '#23cac2', iconColor: '#23cac2', key: 1, active: false },
-  { platform: 'blog', color: '#fc4f08', iconColor: '#fc4f08', key: 2, active: false },
+  // { platform: 'website', color: '#23cac2', iconColor: '#23cac2', key: 1, active: false },
+  // { platform: 'blog', color: '#fc4f08', iconColor: '#fc4f08', key: 2, active: false },
   { platform: 'facebook', color: '#3b5998', iconColor: '#3b5998', key: 3, active: false, domain: 'facebook.com' },
   { platform: 'twitter', color: '#00acee', iconColor: '#00acee', key: 4, active: false, domain: 'twitter.com' },
   { platform: 'linkedin', color: '#0e76a8', iconColor: '#0e76a8', key: 5, active: false, domain: 'linkedin.com/in' },
@@ -43,15 +44,15 @@ export const socialPlatforms = [
   { platform: 'spotify', color: '#1DB954', iconColor: '#1DB954', key: 12, active: false, domain: 'open.spotify.com/user' },
   { platform: 'tiktok', color: '#ff0050', iconColor: '#000000', key: 13, active: false, domain: 'vm.tiktok.com' },
   { platform: 'vimeo', color: '#86c9ef', iconColor: '#86c9ef', key: 14, active: false, domain: 'vimeo.com' },
-  { platform: 'paypal', color: '#003087', iconColor: '#003087', key: 15, active: false, domain: 'paypal.com' },
-  { platform: 'venmo', color: '#1ab7ea', iconColor: '#1ab7ea', key: 16, active: false, domain: 'venmo.com' },
+  { platform: 'discord', color: '#003087', iconColor: '#003087', key: 15, active: false, domain: 'discord.com' },
+  { platform: 'dribbble', color: '#1ab7ea', iconColor: '#1ab7ea', key: 16, active: false, domain: 'dribbble.com' },
   { platform: 'reddit', color: '#ff4500', iconColor: '#ff4500', key: 17, active: false, domain: 'reddit.com' },
-  { platform: 'applemusic', color: '#FB233B', iconColor: '#FB233B', key: 18, active: false, domain: 'music.apple.com' },
+  { platform: 'x', color: '#FB233B', iconColor: '#FB233B', key: 18, active: false, domain: 'twitter.com' },
   { platform: 'behance', color: '#1769ff', iconColor: '#1769ff', key: 19, active: false, domain: 'behance.net' },
-  { platform: 'anchor', color: '#5017B8', iconColor: '#5017B8', key: 20, active: false, domain: 'anchor.fm' },
-  { platform: 'applePodcast', color: '#b150e2', iconColor: '#b150e2', key: 21, active: false, domain: 'itunes.apple.com' },
-  { platform: 'calendly', color: '#006BFF', iconColor: '#006BFF', key: 22, active: false, domain: 'calendly.com' },
-  { platform: 'dribbble', color: '#E74D89', iconColor: '#E74D89', key: 23, active: false, domain: 'dribbble.com' },
+  { platform: 'itunes', color: '#5017B8', iconColor: '#5017B8', key: 20, active: false, domain: 'itunes.apple.com' },
+  { platform: 'matrix', color: '#b150e2', iconColor: '#b150e2', key: 21, active: false, domain: 'matrix.org' },
+  { platform: 'google', color: '#006BFF', iconColor: '#006BFF', key: 22, active: false, domain: 'google.com' },
+  { platform: 'soundcloud', color: '#E74D89', iconColor: '#E74D89', key: 23, active: false, domain: 'soundcloud.com' },
   { platform: 'github', color: '#24292f', iconColor: '#24292f', key: 24, active: false, domain: 'github.com' },
   { platform: 'twitch', color: '#6441a4', iconColor: '#6441a4', key: 25, active: false, domain: 'twitch.tv' },
   /* eslint-enable object-curly-newline */

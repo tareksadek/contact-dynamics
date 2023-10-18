@@ -1,14 +1,16 @@
 import React from 'react';
 import ErrorBoundary from './hoc/ErrorBoundary';
-import AppThemeProvider from './providers/AppThemeProvider';
+import { ThemeProvider } from './contexts/ThemeContext';
 import AppContent from './containers/AppContent/AppContent';
+import { CssBaseline } from '@mui/material';
 
 const App: React.FC = () => {  
   return (
     <ErrorBoundary fallback={<h1>Something went wrong.</h1>}>
-      <AppThemeProvider>
+      <ThemeProvider>
+        <CssBaseline />
         <AppContent />
-      </AppThemeProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

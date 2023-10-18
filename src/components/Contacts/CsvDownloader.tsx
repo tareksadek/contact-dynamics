@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Button, Menu, MenuItem } from '@mui/material';
+import { Button, Menu, MenuItem, Box } from '@mui/material';
 import Papa from 'papaparse';
 import {
   CONNECTIONS_CSV_HEADER,
@@ -8,7 +8,8 @@ import {
   CONNECTIONS_SALESFORCE_CSV_HEADER,
   CONNECTIONS_HUBSPOT_CSV_HEADER
 } from '../../setup/setup';
-
+import DownloadIcon from '@mui/icons-material/Download';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { mapToStandardCSV, mapToFacebookCSV, mapToMailchimpCSV, mapToSalesforceCSV, mapToHubspotCSV } from '../../utilities/utils';
 import { ContactType } from '../../types/contact';
 
@@ -73,10 +74,17 @@ const CsvDownloader: FC<Props> = ({ contacts, fileName }) => {
   };
 
   return (
-    <>
-      <Button aria-haspopup="true" onClick={handleMenuOpen}>
-        Download CSV
-      </Button>
+    <Box>
+      <Box>
+        <Button
+          aria-haspopup="true"
+          onClick={handleMenuOpen}
+          startIcon={<DownloadIcon />}
+          endIcon={<KeyboardArrowDownIcon />}
+        >
+          Download as CSV
+        </Button>
+      </Box>
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -88,7 +96,7 @@ const CsvDownloader: FC<Props> = ({ contacts, fileName }) => {
         <MenuItem onClick={() => downloadCSV(CONNECTIONS_SALESFORCE_CSV_HEADER)}>Salesforce CSV</MenuItem>
         <MenuItem onClick={() => downloadCSV(CONNECTIONS_HUBSPOT_CSV_HEADER)}>Hubspot CSV</MenuItem>
       </Menu>
-    </>
+    </Box>
   );
 };
 

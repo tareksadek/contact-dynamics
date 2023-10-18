@@ -5,22 +5,25 @@ import React, {
   useCallback,
   useRef,
 } from 'react';
+import _ from 'lodash';
 import { useSelector, useDispatch } from 'react-redux';
-import { Typography } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import LinksCreator from '../../../components/Profile/LinksCreator';
 import { LinkType } from '../../../types/profile';
 import { RootState, AppDispatch } from '../../../store/reducers';
 import { useRegisterSubmit, SubmitContext } from '../../../contexts/SubmitContext';
 import { updateProfileLinks } from '../../../store/actions/profile';
+import { layoutStyles } from '../../../theme/layout';
 
 const Links: React.FC = () => {
+  const layoutClasses = layoutStyles()
   const authUser = useSelector((state: RootState) => state.authUser);
   const user = useSelector((state: RootState) => state.user.user);
   const profile = useSelector((state: RootState) => state.profile.profile);
   const registerSubmit = useRegisterSubmit();
   const context = useContext(SubmitContext);
   if (!context) throw new Error('Context not available');
-  const { setFormChanged, setFormValid } = context;
+  const { setFormChanged, setFormValid, formValid, formChanged } = context;
   const dispatch = useDispatch<AppDispatch>();
 
   const [links, setLinks] = useState<{ social: LinkType[], custom: LinkType[] }>({ social: [], custom: [] });
@@ -29,13 +32,10 @@ const Links: React.FC = () => {
   const initialCustomLinksData = useRef<LinkType[]>(links.custom);
 
   const checkIfLinksChanged = useCallback(() => {
-    const socialLinksChanged = JSON.stringify(initialSocialLinksData.current) !== JSON.stringify(links.social);
-    const customLinksChanged = JSON.stringify(initialCustomLinksData.current) !== JSON.stringify(links.custom);
+    const socialLinksChanged = !_.isEqual(initialSocialLinksData.current, links.social);
+    const customLinksChanged = !_.isEqual(initialCustomLinksData.current, links.custom);
     return { socialLinksChanged, customLinksChanged }
   }, [links]);
-
-  // console.log(links);
-  // console.log(profile && profile.links.social);
 
   const handleLinksSubmit = useCallback(() => {
     if (!authUser?.userId || !user) {
@@ -43,11 +43,9 @@ const Links: React.FC = () => {
     }
     const linksChanged = checkIfLinksChanged();
 
-    console.log(links);
-    
     if (linksChanged.socialLinksChanged || linksChanged.customLinksChanged) {
       dispatch(updateProfileLinks(authUser?.userId, user.activeProfileId, links))
-    }   
+    }
   }, [authUser?.userId, user, links, checkIfLinksChanged, dispatch]);
 
   useEffect(() => {
@@ -70,13 +68,28 @@ const Links: React.FC = () => {
   }, [checkIfLinksChanged, links, setFormChanged, setFormValid]);
 
   return (
-    <div>
-      <Typography variant="h5" gutterBottom>Links</Typography>
+    <Box>
       <LinksCreator
         setLinks={setLinks}
         links={links}
       />
-    </div>
+      <Box
+        className={layoutClasses.stickyBottomBox}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Button
+          onClick={handleLinksSubmit}
+          fullWidth
+          variant="contained"
+          color="primary"
+          disabled={!formValid || !formChanged}
+        >
+          Save
+        </Button>
+      </Box>
+    </Box>
   );
 }
 

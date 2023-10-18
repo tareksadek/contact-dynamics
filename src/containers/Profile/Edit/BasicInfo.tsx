@@ -4,7 +4,8 @@ import React, {
   useCallback,
   useContext,
 } from 'react';
-import { Typography } from '@mui/material';
+import _ from 'lodash';
+import { Box, Button } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { RootState, AppDispatch } from '../../../store/reducers';
@@ -12,8 +13,10 @@ import BasicInfoForm from '../../../components/Profile/BasicInfoForm';
 import { BasicInfoFormDataTypes } from '../../../types/profile';
 import { useRegisterSubmit, SubmitContext } from '../../../contexts/SubmitContext';
 import { updateBasicInfo } from '../../../store/actions/profile';
+import { layoutStyles } from '../../../theme/layout';
 
 const BasicInfo: React.FC = () => {
+  const layoutClasses = layoutStyles()
   const authUser = useSelector((state: RootState) => state.authUser);
   const user = useSelector((state: RootState) => state.user.user);
   const profile = useSelector((state: RootState) => state.profile.profile);
@@ -21,7 +24,7 @@ const BasicInfo: React.FC = () => {
   const registerSubmit = useRegisterSubmit();
   const context = useContext(SubmitContext);
   if (!context) throw new Error('Context not available');
-  const { setFormChanged, setFormValid } = context;
+  const { setFormChanged, setFormValid, formValid, formChanged } = context;
   const dispatch = useDispatch<AppDispatch>();
 
   const [currentAddress, setCurrentAddress] = useState<string | null>(null)
@@ -40,10 +43,7 @@ const BasicInfo: React.FC = () => {
     },
     mode: 'onBlur',
   });
-  const watchedValues = watch();
-
-  console.log(profile ? profile.basicInfoData?.phone2 : 'no');
-  
+  const watchedValues = watch();  
 
   useEffect(() => {
     if (profile) {
@@ -73,7 +73,6 @@ const BasicInfo: React.FC = () => {
     }
     formData.location = location
     dispatch(updateBasicInfo(authUser?.userId, user.activeProfileId, formData));
-    console.log(formData);
   }, [authUser?.userId, dispatch, user, location]);
 
   useEffect(() => {
@@ -86,21 +85,16 @@ const BasicInfo: React.FC = () => {
 
   useEffect(() => {
     if (profile && profile.basicInfoData) {
-      const hasChanged = JSON.stringify(profile.basicInfoData) !== JSON.stringify(watchedValues);
+      const profileDataWithoutLocation = _.omit(profile.basicInfoData, 'location');      
+      const hasChanged = !_.isEqual(profileDataWithoutLocation, watchedValues);
+      
       setFormChanged(hasChanged);
     }
   }, [watchedValues, setFormChanged, profile]);
 
   return (
-    <div>
-      {user && (
-        <>
-          <h1>{user.firstName} {user.lastName}</h1>
-        </>
-      )}
+    <Box>
       <form onSubmit={handleSubmit(handleBasicInfoSubmit)}>
-        <Typography variant="h5" gutterBottom>Basic Info</Typography>
-
         <BasicInfoForm
           formStatedata={profile ? profile?.basicInfoData : null}
           location={location}
@@ -114,8 +108,24 @@ const BasicInfo: React.FC = () => {
           currentUser={user}
           currentAddress={currentAddress}
         />
+        <Box
+          className={layoutClasses.stickyBottomBox}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            disabled={!formValid || !formChanged}
+          >
+            Save
+          </Button>
+        </Box>
       </form> 
-    </div>
+    </Box>
   );
 }
 

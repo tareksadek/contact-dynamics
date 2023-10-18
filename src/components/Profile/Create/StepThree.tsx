@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Button, Typography } from '@mui/material';
+import { Button, Typography, Box } from '@mui/material';
 import ProfileImageProcessor from '../ProfileImageProcessor';
 import CoverImageProcessor from '../CoverImageProcessor';
 import { profileImageDimensions, coverImageDimensions } from '../../../setup/setup';
 import { UserType } from '../../../types/user';
 import { ImageType } from '../../../types/profile';
 import { RootState } from '../../../store/reducers';
+import { stepsStyles } from './styles';
 
 interface StepThreeProps {
   onNext: () => void;
@@ -33,6 +34,7 @@ const StepThree: React.FC<StepThreeProps> = ({
   currentUser,
   isLastStep,
 }) => {
+  const classes = stepsStyles();
   const appSetup = useSelector((state: RootState) => state.setup.setup);
   
   useEffect(() => {
@@ -60,34 +62,53 @@ const StepThree: React.FC<StepThreeProps> = ({
   ]);
 
   return (
-    <div>
-      {currentUser && !currentUser.isTeamMember && appSetup && appSetup.coverImageData && !appSetup.coverImageData.url && (
-        <div>
-          <Typography variant="h5" gutterBottom>Cover Image</Typography>
-          <CoverImageProcessor
-            data={coverImageData}
-            setData={setCoverImageData}
-            cropWidth={coverImageDimensions.width}
-            cropHeight={coverImageDimensions.height}
-          />
-        </div>
-      )}
-
-      <div>
-        <Typography variant="h5" gutterBottom>Profile Image</Typography>
+    <Box>
+      <Box pb={2}>
+        <Typography variant="h4" align="center">Profile Picture</Typography>
         <ProfileImageProcessor
           data={profileImageData}
           setData={setProfileImageData}
           cropWidth={profileImageDimensions.width}
           cropHeight={profileImageDimensions.height}
         />
-      </div>
+      </Box>
 
-      <div>
-        <Button onClick={onPrev}>Previous</Button>
-        <Button onClick={onNext}>{isLastStep ? 'Finish' : 'Next'}</Button>
-      </div>
-    </div>
+      {currentUser && !currentUser.isTeamMember && appSetup && appSetup.coverImageData && !appSetup.coverImageData.url && (
+        <Box mt={2} mb={2}>
+          <Typography variant="h4" align="center">Cover Photo</Typography>
+          <CoverImageProcessor
+            data={coverImageData}
+            setData={setCoverImageData}
+            cropWidth={coverImageDimensions.width}
+            cropHeight={coverImageDimensions.height}
+          />
+        </Box>
+      )}
+
+      <Box
+        className={classes.stickyBox}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Button
+          onClick={onPrev}
+          variant="outlined"
+          color="primary"
+        >
+          Previous
+        </Button>
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          onClick={onNext}
+        >
+          {isLastStep ? 'Finish' : 'Next'}
+        </Button>
+      </Box>
+    </Box>
   );
 }
 

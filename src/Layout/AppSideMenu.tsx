@@ -5,6 +5,7 @@ import ProfileSwitcher from "./ProfileSwitcher";
 import { RootState } from '../store/reducers';
 import { defaultMenu, teamMasterMenu, teamMemberMenu, adminMenu } from '../setup/setup';
 import MenuLinks from './MenuLinks';
+import { sideMenuStyles } from './appStyles';
 
 type AppSideMenuProps = {
   isOpen: boolean;
@@ -22,6 +23,7 @@ type MenuType = {
 };
 
 const AppSideMenu: React.FC<AppSideMenuProps> = ({ isOpen, toggleDrawer }) => {
+  const classes = sideMenuStyles()
   const appSetup = useSelector((state: RootState) => state.setup.setup);
   const currentUser = useSelector((state: RootState) => state.user.user);
 
@@ -38,11 +40,9 @@ const AppSideMenu: React.FC<AppSideMenuProps> = ({ isOpen, toggleDrawer }) => {
   let currentMenu = [...defaultMenu];
 
   if (appSetup?.themeSettings) {
-    // If themeSettings exists, filter out the theme link
     currentMenu = filterMenu(currentMenu, 'theme');
   }
   if (appSetup?.redirect) {
-    // If redirect exists, filter out the redirect link
     currentMenu = filterMenu(currentMenu, 'redirect');
   }
 
@@ -55,8 +55,15 @@ const AppSideMenu: React.FC<AppSideMenuProps> = ({ isOpen, toggleDrawer }) => {
   }
 
   return (
-    <Drawer anchor="left" open={isOpen} onClose={toggleDrawer}>
-      {(!currentUser?.isTeamMaster && !currentUser?.isTeamMember) && appSetup?.withMultipleProfiles && (
+    <Drawer
+      anchor="left"
+      open={isOpen}
+      onClose={toggleDrawer}
+      classes={{
+        paper: classes.sideMenuPaper
+      }}
+    >
+      {(!currentUser?.isTeamMaster && !currentUser?.isTeamMember) && !currentUser?.isAdmin && appSetup?.withMultipleProfiles && (
         <ProfileSwitcher onCloseMenu={toggleDrawer} />
       )}
       <MenuLinks menu={currentMenu} onCloseMenu={toggleDrawer} />

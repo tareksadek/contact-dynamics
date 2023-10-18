@@ -1,9 +1,10 @@
 import React from 'react';
-import { Typography, Button,  } from '@mui/material';
+import { Typography, Button, Box } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import BasicInfoForm from '../BasicInfoForm';
 import { BasicInfoFormDataTypes } from '../../../types/profile';
 import { UserType } from '../../../types/user';
+import { stepsStyles } from './styles';
 
 interface StepOneProps {
   formStatedata: BasicInfoFormDataTypes | null;
@@ -29,6 +30,7 @@ const StepOne: React.FC<StepOneProps> = ({
   loadingUser,
   isFirstStep,
 }) => {
+  const classes = stepsStyles();
   const { control, register, handleSubmit, formState: { errors, isValid }, setValue } = useForm<BasicInfoFormDataTypes>({
     defaultValues: {
       firstName: formStatedata?.firstName || (currentUser ? currentUser?.firstName : ''),
@@ -50,7 +52,9 @@ const StepOne: React.FC<StepOneProps> = ({
         onSubmit(formData)
       })}
     >
-      <Typography variant="h5" gutterBottom>Basic Info</Typography>
+      <Box mt={2}>
+        <Typography variant="h4" align="center">Basic Info</Typography>
+      </Box>
 
       <BasicInfoForm
         formStatedata={formStatedata}
@@ -67,17 +71,22 @@ const StepOne: React.FC<StepOneProps> = ({
       {!isFirstStep && (
         <Button onClick={onPrev}>Previous</Button>
       )}
-      
-      <Button
-        type="submit"
-        fullWidth={isFirstStep}
-        variant="contained"
-        color="primary"
-        style={{ marginTop: '16px' }}
-        disabled={!isValid}
+      <Box
+        className={classes.stickyBox}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
       >
-        Next
-      </Button>
+        <Button
+          type="submit"
+          fullWidth={isFirstStep}
+          variant="contained"
+          color="primary"
+          disabled={!isValid}
+        >
+          Next
+        </Button>
+      </Box>
     </form>
   );
 }

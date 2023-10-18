@@ -1,5 +1,3 @@
-// AppLayout.tsx
-
 import React, { useEffect, ReactNode, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Theme } from '@mui/material/styles';
@@ -12,17 +10,20 @@ import { useLocation } from 'react-router-dom';
 import { openModal, closeMenu } from '../store/actions/modal';
 import ProfileSwitcherDialog from './ProfileSwitcherDialog';
 import { appStyles } from './appStyles';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface AppLayoutProps {
   children: ReactNode;
-  theme: Theme;
+  theme?: Theme;
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children, theme }) => {
   const classes = appStyles();
   const dispatch = useDispatch();  
+  const { setSpecificTheme } = useTheme();
 
   const openModalName = useSelector((state: RootState) => state.modal.openModal);
+  const profile = useSelector((state: RootState) => state.profile.profile);
 
   const isSideMenuOpen = openModalName === 'sideMenu';
 
@@ -50,6 +51,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, theme }) => {
           window.removeEventListener("popstate", handlePopState);
       };
   }, [openModalName, handlePopState]);
+
+  useEffect(() => {
+    if (profile && profile.themeSettings) {            
+      setSpecificTheme(profile.themeSettings.theme)
+    }
+  }, [profile]);
  
 
   const toggleDrawer = useCallback(() => {
@@ -60,9 +67,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, theme }) => {
     }
   }, [dispatch, isSideMenuOpen]);
 
+  const shouldHideHeader = () => {
+    const pagesWithoutHeader = ["/login", "/createAccount"];
+    return pagesWithoutHeader.includes(location!.pathname);
+  };    
+
   return (
     <Box className={classes.mainBox}>
-      {!isDefaultProfile && (
+      {!isDefaultProfile && !shouldHideHeader() && (
         <AppHeader
           userUrlSuffix={currentUser ? currentUser.profileUrlSuffix : null}
           isProfilePage={isProfilePage}

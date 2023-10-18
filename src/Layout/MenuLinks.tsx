@@ -2,8 +2,9 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Accordion, AccordionSummary, AccordionDetails, List, ListItemText, ListItemIcon, ListItemButton } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import PlaceHolderIcon from '@mui/icons-material/Star';
 import { defaultMenu, teamMasterMenu, teamMemberMenu, adminMenu } from '../setup/setup';
+import MenuLinkIcon from './MenuLinkIcon';
+import { sideMenuStyles } from './appStyles';
 
 type MenuLinkProps = {
   menu: typeof defaultMenu | typeof teamMasterMenu | typeof teamMemberMenu | typeof adminMenu;
@@ -11,27 +12,44 @@ type MenuLinkProps = {
 };
 
 const MenuLinks: React.FC<MenuLinkProps> = ({ menu, onCloseMenu }) => {
+  const classes = sideMenuStyles()
   const navigate = useNavigate();
   const location = useLocation();
 
   return (
-    <List>
+    <List className={classes.menuLinksList}>
       {menu.map((item, index) => {
         if (item.title === null) {
           return (
-            <ListItemButton key={index} onClick={() => {
-              navigate(item.links[0].path);
-              onCloseMenu();
-            }}>
-              <ListItemIcon><PlaceHolderIcon /></ListItemIcon>
+            <ListItemButton
+              key={index}
+              onClick={() => {
+                navigate(item.links[0].path);
+                onCloseMenu();
+              }}
+              selected={location.pathname === item.links[0].path}
+            >
+              <ListItemIcon>
+                <MenuLinkIcon linkfor={item.links[0].linkfor} />
+              </ListItemIcon>
               <ListItemText primary={item.links[0].linkfor} />
             </ListItemButton>
           );
         }
 
         return (
-          <Accordion key={index}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Accordion
+            key={index}
+            classes={{
+              root: classes.accordionRoot
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              classes={{
+                root: classes.accordionSummaryRoot
+              }}
+            >
               <ListItemText primary={item.title} />
             </AccordionSummary>
             <AccordionDetails>
@@ -45,7 +63,9 @@ const MenuLinks: React.FC<MenuLinkProps> = ({ menu, onCloseMenu }) => {
                     }}
                     selected={location.pathname === link.path}
                   >
-                    <ListItemIcon><PlaceHolderIcon /></ListItemIcon>
+                    <ListItemIcon>
+                      <MenuLinkIcon linkfor={link.linkfor} />
+                    </ListItemIcon>
                     <ListItemText primary={link.linkfor} />
                   </ListItemButton>
                 ))}

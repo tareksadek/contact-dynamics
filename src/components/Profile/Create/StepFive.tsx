@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, Typography } from '@mui/material';
+import { Button, Box } from '@mui/material';
 import ThemeCreator from '../ThemeCreator';
 import { ThemeSettingsType, ColorType } from '../../../types/profile';
+import { stepsStyles } from './styles';
 
 type StepFiveProps = {
   onNext: () => void;
@@ -22,11 +23,9 @@ const StepFive: React.FC<StepFiveProps> = ({
   setFavoriteColors,
   isLastStep,
 }) => {
-
+  const classes = stepsStyles();
   return (
-    <div>
-      <Typography variant="h5">Profile Design</Typography>
-
+    <Box>
       <ThemeCreator
         data={data}
         setData={setData}
@@ -34,9 +33,30 @@ const StepFive: React.FC<StepFiveProps> = ({
         setFavoriteColors={setFavoriteColors}
       />
 
-      <Button onClick={onPrev}>Previous</Button>
-      <Button onClick={onNext}>{isLastStep ? 'Finish' : 'Next'}</Button>
-    </div>
+      <Box
+        className={classes.stickyBox}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Button
+          onClick={onPrev}
+          variant="outlined"
+          color="primary"
+        >
+          Previous
+        </Button>
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          onClick={onNext}
+        >
+          {isLastStep ? 'Finish' : 'Next'}
+        </Button>
+      </Box>
+    </Box>
   );
 };
 

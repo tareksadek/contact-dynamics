@@ -51,9 +51,9 @@ const useTheme = (): {
     window.localStorage.setItem('appColorPreference', JSON.stringify(color));
     
     // Remove the opposite theme
-    document.body.classList.remove(theme === 'light' ? 'theme-dark' : 'theme-light');
-    // Add the current theme
-    document.body.classList.add(`theme-${theme}`);
+    // document.body.classList.remove(theme === 'light' ? 'theme-dark' : 'theme-light');
+    // // Add the current theme
+    // document.body.classList.add(`theme-${theme}`);
 
   }, [theme, color]);
 
@@ -62,7 +62,11 @@ const useTheme = (): {
   };
 
   const setSpecificTheme = (specificTheme: Theme) => {
+    console.log(theme);
+    
     setTheme(specificTheme);
+    console.log(theme);
+    
   };
 
   const setSpecificColor = (specificColor: Color) => {

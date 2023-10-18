@@ -20,6 +20,7 @@ const ProtectedWrapper: React.FC<ProtectedWrapperProps> = ({ children }) => {
     return <LoadingBackdrop 
       message="Authenticating..."
       onComplete={() => true}
+      cubed
     />
   }
 

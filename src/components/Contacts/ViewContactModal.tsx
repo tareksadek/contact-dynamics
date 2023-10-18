@@ -1,7 +1,9 @@
 import React from 'react';
 import { format, parse } from 'date-fns';
-import { Drawer, List, ListItem, ListItemText } from '@mui/material';
+import { Drawer, List, ListItem, ListItemText, Box, Link, IconButton } from '@mui/material';
 import { ContactType } from '../../types/contact';
+import { layoutStyles } from '../../theme/layout';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface ViewContactModalProps {
   open: boolean;
@@ -10,46 +12,89 @@ interface ViewContactModalProps {
 }
 
 const ViewContactModal: React.FC<ViewContactModalProps> = ({ open, onClose, contact }) => {
-  console.log(contact?.createdOn);
-  
+  const layoutClasses = layoutStyles()
   return (
-    <Drawer anchor="bottom" open={open} onClose={onClose}>
-      <div style={{ width: '100%', padding: '1rem' }}>
+    <Drawer
+      anchor="bottom"
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        className: layoutClasses.radiusBottomDrawer
+      }}
+    >
+      <Box p={2}>
         <List>
           <ListItem>
-            <ListItemText primary="First Name" secondary={contact?.firstName || ''} />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="Last Name" secondary={contact?.lastName || ''} />
+            <ListItemText
+              primary={`${contact?.firstName || ''} ${contact?.lastName || ''}`}
+              primaryTypographyProps={{
+                align: 'center',
+                style: {
+                  textTransform: 'capitalize'
+                }
+              }}
+            />
           </ListItem>
           <ListItem>
             <ListItemText
-              primary="Email"
-              secondary={(
-                <a href={`mailto:${contact?.email}`}>{contact?.email}</a>
+              primary={(
+                <Link
+                  href={`mailto:${contact?.email}`}
+                >
+                  {contact?.email}
+                </Link>
               )}
-            >
-            </ListItemText>
+              primaryTypographyProps={{
+                align: 'center',
+              }}
+            />
           </ListItem>
           <ListItem>
             <ListItemText
-              primary="Phone"
-              secondary={(
-                <a href={`tel:${contact?.phone}`}>{contact?.phone}</a>
+              primary={(
+                <Link
+                  href={`tel:${contact?.phone}`}
+                >
+                  {contact?.phone}
+                </Link>
               )}
-            >
-            </ListItemText>
+              primaryTypographyProps={{
+                align: 'center',
+              }}
+            />
           </ListItem>
           {contact && typeof contact.createdOn === 'string' && (
             <ListItem>
-              <ListItemText primary="Created On" secondary={format(parse(contact.createdOn as string, 'yyyy-MMM-dd', new Date()), 'yyyy-MMM-dd')} />
+              <ListItemText
+                primary="Created On"
+                secondary={format(parse(contact.createdOn as string, 'yyyy-MMM-dd', new Date()), 'yyyy-MMM-dd')}
+                primaryTypographyProps={{
+                  align: 'center',
+                }}
+                secondaryTypographyProps={{
+                  align: 'center',
+                }}
+              />
             </ListItem>
           )}
           <ListItem>
-            <ListItemText primary="Note" secondary={contact?.note || ''} />
+            <ListItemText
+              primary={contact?.note || ''}
+              primaryTypographyProps={{
+                align: 'center',
+              }}
+            />
           </ListItem>
         </List>
-      </div>
+      </Box>
+      <IconButton
+        aria-label="delete"
+        color="primary"
+        className={layoutClasses.drawerCloseButton}
+        onClick={onClose}
+      >
+        <CloseIcon />
+      </IconButton>
     </Drawer>
   );
 }

@@ -4,8 +4,10 @@ import { RootState, AppDispatch } from '../store/reducers';
 import { Dialog, DialogContent, List, ListItem, ListItemText, Box, ListItemButton } from '@mui/material';
 import { switchProfile } from '../store/actions/profile';
 import { closeMenu } from '../store/actions/modal';
+import { sideMenuStyles } from './appStyles';
 
 const ProfileSwitcherDialog: React.FC = () => {
+  const classes = sideMenuStyles()
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user.user);
   const openModalName = useSelector((state: RootState) => state.modal.openModal);
@@ -34,12 +36,20 @@ const ProfileSwitcherDialog: React.FC = () => {
         <Box maxWidth={550} margin="auto" width="100%">
           <List>
             {user?.profileList?.map((p) => (
-              <ListItem key={p.profileId}>
+              <ListItem
+                key={p.profileId}
+                className={classes.switchDialogButton}
+              >
                 <ListItemButton
                   disabled={p.profileId === user?.activeProfileId}
                   onClick={() => switchActiveProfile(p.profileId)}
                 >
-                  <ListItemText primary={p.profileTitle} />
+                  <ListItemText
+                    primary={p.profileTitle}
+                    primaryTypographyProps={{
+                      align: 'center'
+                    }}
+                  />
                 </ListItemButton>
               </ListItem>
             ))}

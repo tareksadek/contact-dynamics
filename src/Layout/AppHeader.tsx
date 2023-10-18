@@ -17,6 +17,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import QrDrawer from '../components/Profile/View/QrDrawer';
 import { RootState, AppDispatch } from '../store/reducers';
 import { openModal, closeMenu } from '../store/actions/modal';
+import { appHeaderStyles } from './appStyles';
 
 type AppHeaderProps = {
   userUrlSuffix: string | null;
@@ -45,6 +46,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   isLoggedIn,
   onMenuButtonClick,
 }) => {
+  const classes = appHeaderStyles()
   const dispatch = useDispatch<AppDispatch>();
   const submit = useSubmit();
   const context = useContext(SubmitContext);
@@ -53,21 +55,38 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
 
+  const user = useSelector((state: RootState) => state.users.selectedUser);
   const openModalName = useSelector((state: RootState) => state.modal.openModal);
   const isQrModalOpen = openModalName === 'qr';
 
   const getTitleFromPathname = (pathname: string) => {
+    const userRegex = /^\/users\/[^/]+$/; // Matches /users/:userId
+    const userContactsRegex = /^\/users\/[^/]+\/contacts$/; // Matches /users/:userId/contacts
+    const userAnalyticsRegex = /^\/users\/[^/]+\/analytics$/; // Matches /users/:userId/analytics
+
+    if (userRegex.test(pathname)) {
+      return user && user.fullName ? user.fullName : "User Details";
+    } else if (userContactsRegex.test(pathname)) {
+      return user && user.fullName ? `${user.fullName} Contacts` : "User Contacts";
+    } else if (userAnalyticsRegex.test(pathname)) {
+      return user && user.fullName ? `${user.fullName} Analytics` : "User Contacts";
+    }
+
     switch (pathname) {
       case "/info":
-        return "Edit Info";
+        return "Info";
       case "/about":
-        return "Edit About Data";
+        return "About";
       case "/theme":
-        return "Edit Theme";
+        return "Theme";
       case "/images":
-        return "Edit Images";
+        return "Images";
       case "/links":
-        return "Edit Links";
+        return "Links";
+      case "/contacts":
+        return "Contacts";
+      case "/efficiency":
+        return "Digital Card Report";
       case "/adminDashboard":
         return "Dashboard";
       case "/batches":
@@ -76,6 +95,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         return "Create New Batch";
       case "/users":
         return "Users";
+      case "/users/:userId":
+        return user && user.fullName ? user.fullName : "User Details";
       default:
         return "Default Title";
     }
@@ -84,10 +105,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   const currentTitle = getTitleFromPathname(location!.pathname);
 
   const shouldShowSaveButton = (pathname: string) => {
-    const pagesWithSaveButton = ["/info", "/about", "/theme", "/images", "/links", "/contactForm", "/redirect"];
+    // const pagesWithSaveButton = ["/info", "/about", "/theme", "/images", "/links", "/contactForm", "/redirect"];
+    const pagesWithSaveButton = ["/dummyPage"]
     return pagesWithSaveButton.includes(pathname);
   };
-  
+
   const onBackClick = () => {
     navigate(`/${userUrlSuffix}`)
   }
@@ -99,36 +121,40 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   return (
     <>
       <HideOnScroll>
-        <AppBar position="sticky">
+        <AppBar
+          position="sticky"
+          classes={{
+            root: classes.appBarRoot
+          }}
+        >
           <Toolbar>
-            {isLoggedIn && (
-              <IconButton edge="start" color="inherit" aria-label="menu" onClick={onMenuButtonClick}>
-                <MenuIcon />
-              </IconButton>
-            )}
-            
             {userUrlSuffix && !isProfilePage && (
-              <IconButton edge="start" color="inherit" aria-label="menu" onClick={onBackClick}>
+              <IconButton
+                edge="start"
+                aria-label="menu"
+                onClick={onBackClick}
+                className={classes.appBarButtons}
+              >
                 <ArrowBackIcon />
               </IconButton>
             )}
 
             {!isProfilePage && (
-              <Typography variant="h6" style={{ flexGrow: 1 }}>
+              <Typography variant="body1" style={{ flexGrow: 1, textTransform: 'capitalize' }}>
                 {currentTitle}
               </Typography>
             )}
-            
+
             {isProfilePage ? (
               <IconButton
                 edge="end"
-                color="inherit"
                 aria-label="qr-code"
                 style={{
                   marginLeft: 'auto',
                   marginRight: 0
                 }}
                 onClick={handleQrClick}
+                className={classes.appBarButtons}
               >
                 <QrCodeIcon />
               </IconButton>
@@ -140,6 +166,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({
               >
                 Save
               </Button>
+            )}
+
+            {isLoggedIn && (
+              <IconButton
+                edge="start"
+                aria-label="menu"
+                onClick={onMenuButtonClick}
+                className={classes.appBarButtons}
+              >
+                <MenuIcon />
+              </IconButton>
             )}
           </Toolbar>
         </AppBar>

@@ -1,4 +1,129 @@
 import { styled } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
+import { Theme } from '@mui/material/styles';
+
+const size = 50;
+
+export const cubeStyles = makeStyles((theme: Theme) => ({
+  '@keyframes folding': {
+    '0%, 10%': {
+      transform: 'perspective(140px) rotateX(-180deg)',
+      opacity: 0,
+    },
+    '25%, 75%': {
+      transform: 'perspective(140px) rotateX(0deg)',
+      opacity: 1,
+    },
+    '90%, 100%': {
+      transform: 'perspective(140px) rotateY(180deg)',
+      opacity: 0,
+    }
+  },
+  '@keyframes text': {
+    '100%': {
+      top: size / 2 + 10,
+    }
+  },
+  '@keyframes shadow': {
+    '100%': {
+      bottom: -18,
+      width: size * 2,
+    }
+  },
+  backdropContainer: {
+    position: 'absolute',
+    backgroundColor: theme.palette.background.backdrop,
+    width: '100%',
+    height: '100%',
+    left: 0,
+    top: 0,
+    zIndex: 9999,
+  },
+  loading: {},
+  cubeWrapper: {
+    position: 'fixed',
+    left: '50%',
+    top: '50%',
+    marginTop: -size,
+    marginLeft: -size * 3,
+    width: size * 6,
+    height: size * 2,
+    textAlign: 'center',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: -20,
+      margin: 'auto',
+      width: size * 1.8,
+      height: 6,
+      zIndex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+      filter: 'blur(2px)',
+      borderRadius: '100%',
+      animation: '$shadow 0.5s ease infinite alternate',
+    },
+    '& $loading': {
+      letterSpacing: '0.1em',
+      display: 'block',
+      position: 'relative',
+      top: size / 2,
+      zIndex: 2,
+      animation: '$text 0.5s ease infinite alternate',
+    }
+  },
+  leaf2: {},
+  leaf3: {},
+  leaf4: {},
+  cubeFolding: {
+    width: size,
+    height: size,
+    display: 'inline-block',
+    fontSize: 0,
+    '& span': {
+      position: 'relative',
+      width: size / 2,
+      height: size / 2,
+      transform: 'scale(1.1)',
+      display: 'inline-block',
+      '&::before': {
+        content: '""',
+        backgroundColor: theme.palette.grey[200],
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        display: 'block',
+        width: size / 2,
+        height: size / 2,
+        transformOrigin: '100% 100%',
+        animation: '$folding 2.5s infinite linear both',
+      },
+    },
+    '& $leaf2': {
+      transform: 'rotateZ(90deg) scale(1.1)',
+      '&::before': {
+        animationDelay: '0.3s',
+        backgroundColor: theme.palette.grey[300],
+      }
+    },
+    '& $leaf3': {
+      transform: 'rotateZ(270deg) scale(1.1)',
+      '&::before': {
+        animationDelay: '0.9s',
+        backgroundColor: theme.palette.grey[400],
+      }
+    },
+    '& $leaf4': {
+      transform: 'rotateZ(180deg) scale(1.1)',
+      '&::before': {
+        animationDelay: '0.6s',
+        backgroundColor: theme.palette.grey[500],
+      }
+    },
+  },
+}));
+
 
 type BackdropProps = {
   boxed?: boolean;

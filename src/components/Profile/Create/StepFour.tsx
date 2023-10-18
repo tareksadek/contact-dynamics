@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, Typography } from '@mui/material';
+import { Button, Box } from '@mui/material';
 import LinksCreator from '../LinksCreator';
 import { LinkType } from '../../../types/profile';
+import { stepsStyles } from './styles';
 
 interface StepFourProps {
   onNext: () => void;
@@ -25,25 +26,43 @@ const StepFour: React.FC<StepFourProps> = ({
   setLinks,
   isLastStep,
 }) => {
+  const classes = stepsStyles();
   const processLinks = () => {
     console.log(links);
     onNext()
   };
 
   return (
-    <div>
-      <Typography variant="h5" gutterBottom>Links</Typography>
-
+    <Box>
       <LinksCreator
         setLinks={setLinks}
         links={links}
       />
 
-      <div>
-        <Button onClick={onPrev}>Previous</Button>
-        <Button onClick={processLinks}>{isLastStep ? 'Finish' : 'Next'}</Button>
-      </div>
-    </div>
+      <Box
+        className={classes.stickyBox}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Button
+          onClick={onPrev}
+          variant="outlined"
+          color="primary"
+        >
+          Previous
+        </Button>
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          onClick={processLinks}
+        >
+          {isLastStep ? 'Finish' : 'Next'}
+        </Button>
+      </Box>
+    </Box>
   );
 }
 

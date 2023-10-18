@@ -16,6 +16,7 @@ const ProfileWrapper: React.FC<ProfileWrapperProps> = ({ children }) => {
     return <LoadingBackdrop 
       message="Authenticating..." 
       onComplete={() => true}
+      cubed
     />;
   }
 

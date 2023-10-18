@@ -5,7 +5,8 @@ import { saveAs } from 'file-saver';
 import QRCodeStyling from "qr-code-styling";
 import { DataGrid, GridColDef, GridCellParams } from '@mui/x-data-grid';
 import DoneIcon from '@mui/icons-material/Done';
-import { Button, Chip } from '@mui/material';
+import { Button, Chip, Box } from '@mui/material';
+import DownloadIcon from '@mui/icons-material/Download';
 import { getInvitationsByBatchId, addInvitations } from '../../store/actions/batch';
 import { AppDispatch, RootState } from '../../store/reducers';
 import { useParams } from 'react-router-dom';
@@ -14,10 +15,13 @@ import AddInvitationDrawer from '../../components/Admin/AddInvitationDrawer';
 import InvitationQrCode from '../../components/Admin/InvitationQrCode';
 import LoadingBackdrop from '../../components/Loading/LoadingBackdrop';
 import { appDomain } from '../../setup/setup';
+import { openModal, closeMenu } from '../../store/actions/modal';
+import { layoutStyles } from '../../theme/layout';
+import { dataGridStyles } from './styles';
 
 const Invitations: React.FC = () => {
-  const [addInvitationsDrawerOpen, setAddInvitationsDrawerOpen] = useState(false);
-  const [qrDrawerOpen, setQrDrawerOpen] = useState(false);
+  const layoutClasses = layoutStyles()
+  const classes = dataGridStyles()
   const [selectedInvitationId, setSelectedInvitationId] = useState<string | null>(null)
   const [isProcessingQRs, setIsProcessingQRs] = useState(false);
 
@@ -29,6 +33,9 @@ const Invitations: React.FC = () => {
   const invitations = useSelector((state: RootState) => state.batches.selectedBatch?.invitations || []);
   const selectedBatch = useSelector((state: RootState) => state.batches.selectedBatch?.data || null);
   const isLoading = useSelector((state: RootState) => state.loadingCenter.loadingCounter > 0);  
+  const openModalName = useSelector((state: RootState) => state.modal.openModal);
+  const isInvitationQrModalOpen = openModalName === 'invQr';
+  const isAddInvitationsModalOpen = openModalName === 'addInv';
 
   useEffect(() => {
     if (batchId) {
@@ -36,22 +43,18 @@ const Invitations: React.FC = () => {
     }
   }, [dispatch, batchId]);
 
-  const handleAddInvitationsDrawerClose = () => {
-    setAddInvitationsDrawerOpen(false);
-  };
-
   const handleAddInvitationsDrawerSubmit = (data: { numberOfInvitations: number }) => {
     if (selectedBatch) {
       dispatch(addInvitations(selectedBatch, data.numberOfInvitations, false));
     }
-    handleAddInvitationsDrawerClose();
+    dispatch(closeMenu())
   };
 
   const handleQrClick = (invitationId: string) => {
     if (invitationId) {
       setSelectedInvitationId(invitationId)
     }
-    setQrDrawerOpen(true);
+    dispatch(openModal('invQr'))
   };
 
   const generateFilename = (batch: any) => {
@@ -94,7 +97,7 @@ const Invitations: React.FC = () => {
     {
       field: 'id', 
       headerName: 'Code', 
-      width: 150
+      flex: 1
     },
     {
       field: 'used', 
@@ -103,18 +106,18 @@ const Invitations: React.FC = () => {
       renderCell: (params: GridCellParams) => {
         if (params.row.used) {
           return <Chip 
-                   icon={<DoneIcon />} 
                    label="Used" 
-                   style={{backgroundColor: 'green', color: 'white'}} 
+                   className={classes.teamsChip}
+                   style={{ minWidth: 80 }}
                  />;
         }
-        return <Chip label="Available" />;
+        return <Chip label="Available" style={{ minWidth: 80 }} />;
       },
     },
     { 
       field: 'actions', 
-      headerName: 'Actions', 
-      width: 150,
+      headerName: '', 
+      width: 60,
       renderCell: (params: GridCellParams) => (
         <InvitationActions 
           batchId={batchId}
@@ -136,41 +139,32 @@ const Invitations: React.FC = () => {
   }
 
   return (
-    <div style={{ height: 500, width: '100%' }}>
+    <Box minHeight="500px">
       {isProcessingQRs && (
         <LoadingBackdrop 
           message="Generating QR Codes..."
           onComplete={() => true}
+          cubed
         />
       )}
       
       <Button
-        variant="contained"
-        color="primary"
-        onClick={() => setAddInvitationsDrawerOpen(true)}
-        disabled={isProcessingQRs}
-      >
-        Add invitations
-      </Button>
-
-      <Button
-        variant="contained"
-        color="secondary"
         onClick={downloadAllQRs}
         disabled={isProcessingQRs}
+        startIcon={<DownloadIcon />}
       >
         Download All QR Codes
       </Button>
       
       <AddInvitationDrawer 
-        open={addInvitationsDrawerOpen} 
-        onClose={handleAddInvitationsDrawerClose} 
+        open={isAddInvitationsModalOpen} 
+        onClose={() => dispatch(closeMenu())} 
         onSubmit={handleAddInvitationsDrawerSubmit}
       />
 
       <InvitationQrCode
-        open={qrDrawerOpen}
-        onClose={() => setQrDrawerOpen(false)}
+        open={isInvitationQrModalOpen}
+        onClose={() => dispatch(closeMenu())}
         invitationId={selectedInvitationId}
         batchId={batchId}
       />
@@ -181,13 +175,31 @@ const Invitations: React.FC = () => {
         initialState={{
           pagination: {
             paginationModel: {
-              pageSize: 5,
+              pageSize: 25,
             },
           },
         }}
         pageSizeOptions={[5, 10, 25, 50, 100]}
+        className={classes.gridContainer}
       />
-    </div>
+
+      <Box
+        className={layoutClasses.stickyBottomBox}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Button
+          onClick={() => dispatch(openModal('addInv'))}
+          fullWidth
+          variant="contained"
+          color="primary"
+          disabled={isProcessingQRs}
+        >
+          Add invitations
+        </Button>
+      </Box>
+    </Box>
   );
 };
 

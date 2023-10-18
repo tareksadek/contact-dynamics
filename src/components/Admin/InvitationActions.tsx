@@ -53,12 +53,12 @@ const InvitationActions: React.FC<Props> = ({
     handleClose();
   }
 
-  const handleCopyToClipboard = () => {
-    const invitationLink = `${appDomain}/activate?tac=${invitationId}_${batchId}`;
+  const handleCopyToClipboard = (copyCode: boolean) => {
+    const invitationLink = copyCode ? `${invitationId}_${batchId}` : `${appDomain}/activate?tac=${invitationId}_${batchId}`;
     copy(invitationLink)
       .then(() => {
         dispatch(setNotification({ 
-          message: 'Invitation link copied successfully.', 
+          message: 'Invitation copied successfully.', 
           type: 'success', 
           horizontal: 'right', 
           vertical: 'top' 
@@ -97,7 +97,8 @@ const InvitationActions: React.FC<Props> = ({
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleCopyToClipboard}>Copy Invitation Code</MenuItem> 
+        <MenuItem onClick={() => handleCopyToClipboard(false)}>Copy Invitation Link</MenuItem> 
+        <MenuItem onClick={() => handleCopyToClipboard(true)}>Copy Invitation Code</MenuItem>
         <MenuItem onClick={handleEmailInvitation}>Email Invitation</MenuItem>
         <MenuItem disabled={!used} onClick={handleViewUser}>View User</MenuItem>
         <MenuItem onClick={handleQrDrawer}>View / Download Qr code</MenuItem>

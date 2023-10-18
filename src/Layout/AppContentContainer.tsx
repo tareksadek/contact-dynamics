@@ -1,14 +1,15 @@
 import { Container } from "@mui/material";
 import { ReactNode } from 'react';
-
+import { appStyles } from './appStyles';
 
 interface AppContentContainerProps {
   children: ReactNode;
 }
 
 const AppContentContainer: React.FC<AppContentContainerProps> = ({ children }) => {
+  const classes = appStyles();
   return (
-    <Container style={{maxWidth: 550}}>
+    <Container className={classes.contentContainer}>
       {children}
     </Container>
   );

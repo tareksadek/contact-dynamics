@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Timestamp } from '@firebase/firestore';
-import { Container, Typography, Stepper, Step, StepLabel } from '@mui/material';
+import { Container, Box, Typography, Stepper, Step, StepLabel } from '@mui/material';
 import StepZero from '../../../components/Profile/Create/StepZero';
 import StepOne from '../../../components/Profile/Create/StepOne';
 import StepTwo from '../../../components/Profile/Create/StepTwo';
@@ -50,7 +50,7 @@ const CreateProfile: React.FC = () => {
     layout: appDefaultLayout,
     socialLinksToSelectedColor: appDefaultSocialLinksToSelectedColor
   });
-  const [favoriteColors, setFavoriteColors] = useState<ColorType[]>([]); 
+  const [favoriteColors, setFavoriteColors] = useState<ColorType[]>([]);
 
   const appSetup = useSelector((state: RootState) => state.setup.setup);
   const currentUser = useSelector((state: RootState) => state.user.user);
@@ -60,7 +60,7 @@ const CreateProfile: React.FC = () => {
   const navigate = useNavigate();
 
   const dispatch = useDispatch<AppDispatch>();
-  
+
   // Dynamic steps generation
   const getSteps = () => {
     let steps = [];
@@ -70,13 +70,13 @@ const CreateProfile: React.FC = () => {
     }
 
     steps.push('info');
-  
+
     if (appSetup && appSetup.aboutData && (!appSetup.aboutData.about || !appSetup.aboutData.videoUrl) && currentUser && !currentUser.isTeamMember) {
       steps.push('about');
     }
-  
+
     steps.push('images');
-  
+
     if (currentUser && !currentUser.isTeamMember && appSetup && !appSetup.links) {
       steps.push('links');
     }
@@ -84,7 +84,7 @@ const CreateProfile: React.FC = () => {
     if (currentUser && !currentUser.isTeamMember && appSetup && !appSetup.themeSettings) {
       steps.push('theme');
     }
-  
+
     return steps;
   };
 
@@ -97,27 +97,27 @@ const CreateProfile: React.FC = () => {
   const isLastStep = useCallback(() => {
     return activeStep === steps.length - 1;
   }, [activeStep, steps]);
- 
+
   const handleNext = useCallback(() => {
     if (isLastStep()) {
       if (basicInfoData) {
         basicInfoData.location = location
       }
-        
+
       let profileData = {
-          title: profileTitle || 'default',
-          basicInfoData: basicInfoData,
-          aboutData: aboutData,
-          coverImageData: coverImageData,
-          profileImageData: profileImageData,
-          contactFormData: {
-            formProvider: 'default',
-            embedCode: '',
-          },
-          links,
-          themeSettings,
-          favoriteColors,
-          createdOn: Timestamp.now().toDate(),
+        title: profileTitle || 'default',
+        basicInfoData: basicInfoData,
+        aboutData: aboutData,
+        coverImageData: coverImageData,
+        profileImageData: profileImageData,
+        contactFormData: {
+          formProvider: 'default',
+          embedCode: '',
+        },
+        links,
+        themeSettings,
+        favoriteColors,
+        createdOn: Timestamp.now().toDate(),
       };
 
       // Apply the utility function to replace empty strings and undefined with null
@@ -131,7 +131,7 @@ const CreateProfile: React.FC = () => {
       if (currentUser) {
         navigate(`/${currentUser?.profileUrlSuffix}`);
       }
-      
+
     } else {
       setActiveStep((prevStep) => prevStep + 1);
     }
@@ -156,17 +156,17 @@ const CreateProfile: React.FC = () => {
     setActiveStep((prevStep) => prevStep - 1);
   }, []);
 
-  const handleTitleSubmit = (formData: string) => {    
+  const handleTitleSubmit = (formData: string) => {
     setProfileTitle(formData)
     handleNext()
   };
 
-  const handleBasicInfoSubmit = (formData: Partial<BasicInfoFormDataTypes>) => {    
+  const handleBasicInfoSubmit = (formData: Partial<BasicInfoFormDataTypes>) => {
     setBasicInfoData(formData)
     handleNext()
   };
 
-  const handleAboutSubmit = (formData: Partial<AboutFormDataTypes>) => {    
+  const handleAboutSubmit = (formData: Partial<AboutFormDataTypes>) => {
     setAboutData(formData)
     handleNext()
   };
@@ -180,82 +180,83 @@ const CreateProfile: React.FC = () => {
 
   const stepComponents: { [key: string]: JSX.Element } = {
     'title': <StepZero
-              formStatedata={profileTitle}
-              onSubmit={handleTitleSubmit}
-              currentUser={currentUser}
-              loadingUser={isLoading}
-            />,
-    'info': <StepOne 
-              formStatedata={basicInfoData}
-              location={location}
-              setLocation={setLocation}
-              onPrev={handlePrev}
-              onSubmit={handleBasicInfoSubmit}
-              currentUser={currentUser}
-              loadingUser={isLoading}
-              isFirstStep={isFirstStep()}
-            />,
-    'about': <StepTwo 
-               formStatedata={aboutData}
-               onSubmit={handleAboutSubmit}
-               onPrev={handlePrev}
-               currentUser={currentUser}
-               isLastStep={isLastStep()}
-             />,
+      formStatedata={profileTitle}
+      onSubmit={handleTitleSubmit}
+      currentUser={currentUser}
+      loadingUser={isLoading}
+    />,
+    'info': <StepOne
+      formStatedata={basicInfoData}
+      location={location}
+      setLocation={setLocation}
+      onPrev={handlePrev}
+      onSubmit={handleBasicInfoSubmit}
+      currentUser={currentUser}
+      loadingUser={isLoading}
+      isFirstStep={isFirstStep()}
+    />,
+    'about': <StepTwo
+      formStatedata={aboutData}
+      onSubmit={handleAboutSubmit}
+      onPrev={handlePrev}
+      currentUser={currentUser}
+      isLastStep={isLastStep()}
+    />,
     'images': <StepThree
-                onNext={handleNext}
-                onPrev={handlePrev}
-                coverImageData={coverImageData}
-                setCoverImageData={setCoverImageData}
-                initialCoverImage={null}
-                profileImageData={profileImageData}
-                setProfileImageData={setProfileImageData}
-                initialProfileImage={null}
-                currentUser={currentUser}
-                isLastStep={isLastStep()}
-              />,
+      onNext={handleNext}
+      onPrev={handlePrev}
+      coverImageData={coverImageData}
+      setCoverImageData={setCoverImageData}
+      initialCoverImage={null}
+      profileImageData={profileImageData}
+      setProfileImageData={setProfileImageData}
+      initialProfileImage={null}
+      currentUser={currentUser}
+      isLastStep={isLastStep()}
+    />,
     'links': <StepFour
-                onNext={handleNext}
-                onPrev={handlePrev}
-                links={links}
-                setLinks={setLinks}
-                isLastStep={isLastStep()}
-             />,
+      onNext={handleNext}
+      onPrev={handlePrev}
+      links={links}
+      setLinks={setLinks}
+      isLastStep={isLastStep()}
+    />,
     'theme': <StepFive
-                onNext={handleNext}
-                onPrev={handlePrev}
-                data={themeSettings}
-                setData={setThemeSettings}
-                favoriteColors={favoriteColors}
-                setFavoriteColors={setFavoriteColors}
-                isLastStep={isLastStep()}
-             />
+      onNext={handleNext}
+      onPrev={handlePrev}
+      data={themeSettings}
+      setData={setThemeSettings}
+      favoriteColors={favoriteColors}
+      setFavoriteColors={setFavoriteColors}
+      isLastStep={isLastStep()}
+    />
   };
 
   console.log(getSteps());
-  
+
 
   if (!isLoading) {
     return (
-      <Container maxWidth="md">
-        <Typography variant="h4" align="center">Create Profile</Typography>
-        
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {getSteps().map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-  
-        {stepComponents[getSteps()[activeStep]]}
-  
-      </Container>
+      <Box>
+        <Box pt={2}>
+          <Typography variant="h3" align="center">Create Your Digital Card</Typography>
+          <Box mt={2} mb={3}>
+            <Stepper activeStep={activeStep} alternativeLabel>
+              {getSteps().map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
+          {stepComponents[getSteps()[activeStep]]}
+        </Box>
+      </Box>
     );
   } else {
     return null;
   }
-  
+
 }
 
 export default CreateProfile;

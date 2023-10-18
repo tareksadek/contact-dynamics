@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useForm, Controller } from 'react-hook-form';
 import validator from 'validator';
-import { Button, ButtonBase, Typography, Drawer, Switch, TextField, List, ListItemIcon, ListItemText } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { Box, Button, ButtonBase, IconButton, Typography, Drawer, Switch, TextField, List, ListItemIcon, ListItemText, FormControlLabel } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { SocialIcon } from 'react-social-icons';
 import { socialPlatforms } from '../../setup/setup';
 import { LinkType } from '../../types/profile';
+import { layoutStyles } from '../../theme/layout';
+import { linksStyles } from './styles';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { EditIcon, DragHandleIcon } from '../../Layout/CustomIcons';
+import { RootState, AppDispatch } from '../../store/reducers';
+import { openModal, closeMenu } from '../../store/actions/modal';
+import { truncateString } from '../../utilities/utils';
 
 interface LinksCreatorProps {
   links: {
@@ -18,6 +29,10 @@ interface LinksCreatorProps {
 }
 
 const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const theme = useTheme();
+  const classes = linksStyles()
+  const layoutClasses = layoutStyles()
   const {
     control,
     handleSubmit,
@@ -27,13 +42,16 @@ const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
     formState,
   } = useForm<LinkType>({ mode: 'onChange' });
   const { errors } = formState;
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isPlatformDrawerOpen, setIsPlatformDrawerOpen] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editingLinkIndex, setEditingLinkIndex] = useState<number | null>(null);
   const isSocial = watch('isSocial', false);
   const isActive = watch('active', true);
   const errorForUrl = errors && errors.url;
+
+  const openModalName = useSelector((state: RootState) => state.modal.openModal);
+  const isLinkDetailsModalOpen = openModalName === 'linkDetails';
+  const isSocialLinksListModalOpen = openModalName === 'SocialLinksList';
 
   const onSubmit = (data: LinkType) => {
     let newLinks = { ...links };
@@ -62,11 +80,10 @@ const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
         newLinks.custom = [...newLinks.custom, newLinkData];
       }
     }
-
     setLinks(newLinks);
     setIsEditing(false);
     setEditingLinkIndex(null);
-    setDrawerOpen(false);
+    dispatch(closeMenu())
     reset({
       active: true,
       position: 0,
@@ -81,6 +98,7 @@ const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
   const handleAddLink = (isSocial: boolean, platform?: string) => {
     if (platform) {
       setValue('platform', platform);
+      setSelectedPlatform(platform)
     }
 
     if (isSocial) {
@@ -90,9 +108,9 @@ const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
       setValue('isSocial', false);
       setValue('isCustom', true);
     }
-
+    
     setIsEditing(false);
-    setDrawerOpen(true);
+    dispatch(openModal('linkDetails'));
   };
 
   const handleEditLink = (index: number, isSocialLink: boolean) => {
@@ -107,7 +125,7 @@ const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
 
     setIsEditing(true);
     setEditingLinkIndex(index);
-    setDrawerOpen(true);
+    dispatch(openModal('linkDetails'));
   };
 
   const handleDeleteLink = (index: number, isSocialLink: boolean) => {
@@ -208,44 +226,129 @@ const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
 
 
   console.log(socialPlatforms);
+  console.log(isSocial);
+  
 
 
   return (
-    <div>
-      <div>
-        <div>
-          <Typography variant="h6">Social Links:</Typography>
+    <Box>
+      <Box>
+        <Box>
+          <Box mb={2}>
+            <Typography variant="h4" align="center">Social Links</Typography>
+          </Box>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="social">
               {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
+                <Box {...provided.droppableProps} ref={provided.innerRef}>
                   {links.social.map((link, index) => (
                     <Draggable key={link.platform} draggableId={link.platform} index={index}>
                       {(provided) => (
-                        <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                          <div key={index}>
-                            {link.platform}: {link.url} : {link.active ? 'active' : 'inactive'}
-                            <Button onClick={() => handleEditLink(index, true)}>Edit</Button>
-                            <Button onClick={() => handleDeleteLink(index, true)}>Delete</Button>
-                          </div>
-                        </div>
+                        <Box
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className={classes.linksListItem}
+                        >
+                          <Box
+                            key={index}
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                          >
+                            <Box
+                              display="flex"
+                              alignItems="center"
+                            >
+                              <Box
+                                className={classes.linkItemDragIcon}
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                                flexDirection="column"
+                              >
+                                <DragHandleIcon />
+                              </Box>
+                              
+                              <Box
+                                display="flex"
+                                alignItems="center"
+                                className={link.active ? '' : classes.buttonContainerDisabled}
+                              >
+                                <SocialIcon
+                                  network={link.platform}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                  }}
+                                  style={{ height: 30, width: 30 }}
+                                  bgColor={link.active ? undefined : theme.palette.background.disabledSocialIcon}
+                                />
+                                <Box ml={1}>
+                                  <Typography variant="body1" align="left">
+                                    {truncateString(link.url, 30)}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Box>
+                              <IconButton
+                                onClick={() => handleEditLink(index, true)}
+                                className={classes.linkItemIconButton}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                onClick={() => handleDeleteLink(index, true)}
+                                className={classes.linkItemIconButton}
+                              >
+                                <DeleteOutlineIcon />
+                              </IconButton>
+                            </Box>
+                          </Box>
+                        </Box>
                       )}
                     </Draggable>
                   ))}
                   {provided.placeholder}
-                </div>
+                </Box>
               )}
             </Droppable>
           </DragDropContext>
-          <Button onClick={() => setIsPlatformDrawerOpen(true)}>Add Social Link</Button>
-        </div>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            flexDirection="column"
+            mt={2}
+          >
+            {(!links.social || links.social.length === 0) && (
+              <Box
+                onClick={() => dispatch(openModal('SocialLinksList'))}
+              >
+                <img src="/assets/images/socialLinksPlaceholder.svg" alt="Social Links" />
+              </Box>
+            )}
+            <Box width="100%">
+              <Button
+                onClick={() => dispatch(openModal('SocialLinksList'))}
+                variant="outlined"
+                color="secondary"
+                fullWidth
+              >
+                Add Social Link
+              </Button>
+            </Box>
+          </Box>
+        </Box>
 
-        <div>
-          <Typography variant="h6">Custom Links:</Typography>
+        <Box mt={4}>
+          <Box mb={2}>
+            <Typography variant="h4" align="center">Custom Links</Typography>
+          </Box>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="custom">
               {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
+                <Box {...provided.droppableProps} ref={provided.innerRef}>
                   {links.custom.map((link, index) => (
                     <Draggable
                       key={`${link.url.replace(/\s+/g, '')}${link.title && link.title.replace(/\s+/g, '')}`}
@@ -253,56 +356,159 @@ const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
                       index={index}
                     >
                       {(provided) => (
-                        <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                          <div key={index}>
-                            {link.title}: {link.url} : {link.active ? 'active' : 'inactive'}
-                            <Button onClick={() => handleEditLink(index, false)}>Edit</Button>
-                            <Button onClick={() => handleDeleteLink(index, false)}>Delete</Button>
-                          </div>
-                        </div>
+                        <Box
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className={classes.linksListItem}
+                        >
+                          <Box
+                            key={index}
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                          >
+                            <Box
+                              display="flex"
+                              alignItems="center"
+                            >
+                              <Box
+                                className={classes.linkItemDragIcon}
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                                flexDirection="column"
+                              >
+                                <DragHandleIcon />
+                              </Box>
+                              
+                              <Box
+                                display="flex"
+                                alignItems="center"
+                              >
+                                <Box ml={1}>
+                                  <Typography variant="body1" align="left">
+                                    <b>
+                                      {link.title}
+                                    </b>
+                                  </Typography>
+                                  <Typography variant="body1" align="left">
+                                    {truncateString(link.url, 30)}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Box>
+                              <IconButton
+                                onClick={() => handleEditLink(index, false)}
+                                className={classes.linkItemIconButton}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                onClick={() => handleDeleteLink(index, false)}
+                                className={classes.linkItemIconButton}
+                              >
+                                <DeleteOutlineIcon />
+                              </IconButton>
+                            </Box>
+                          </Box>
+                        </Box>
                       )}
                     </Draggable>
                   ))}
                   {provided.placeholder}
-                </div>
+                </Box>
               )}
             </Droppable>
           </DragDropContext>
-          <Button onClick={() => handleAddLink(false, 'custom')}>Add Custom Link</Button>
-        </div>
-      </div>
 
-      <Drawer anchor="bottom" open={isPlatformDrawerOpen} onClose={() => setIsPlatformDrawerOpen(false)}>
-        <div>
-          <Typography variant="h6">Select a Social Platform</Typography>
-          <List>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            flexDirection="column"
+            mt={2}
+          >
+            {(!links.custom || links.custom.length === 0) && (
+              <Box
+                onClick={() => handleAddLink(false, 'custom')}
+              >
+                <img src="/assets/images/customLinksPlaceholder.svg" alt="Custom Links" />
+              </Box>
+            )}
+            <Box width="100%">
+              <Button
+                onClick={() => handleAddLink(false, 'custom')}
+                variant="outlined"
+                color="secondary"
+                fullWidth
+              >
+                Add Custom Link
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      <Drawer
+        anchor="bottom"
+        open={isSocialLinksListModalOpen}
+        onClose={() => dispatch(closeMenu())}
+        PaperProps={{
+          className: layoutClasses.radiusBottomDrawer
+        }}
+      >
+        <Box p={2}>
+          <Typography variant="h4" align="center">Select a Platform</Typography>
+          <List className={classes.buttonsContainer}>
             {socialPlatforms.map(platform => (
               <ButtonBase
                 key={platform.platform}
-                style={{ width: '100%' }}
                 onClick={() => {
-                  setIsPlatformDrawerOpen(false);
+                  dispatch(closeMenu())
                   handleAddLink(true, platform.platform);
                 }}
                 disabled={links.social.some(link => link.platform === platform.platform)}
+                classes={{
+                  root: `${classes.buttonContainer} ${links.social.some(link => link.platform === platform.platform) ? classes.buttonContainerDisabled : ''}`
+                }}
               >
                 <ListItemIcon>
-                  {/* You can render an icon here if you have it, using platform.iconColor */}
+                  <SocialIcon
+                    network={platform.platform}
+                    bgColor={links.social.some(link => link.platform === platform.platform) ? theme.palette.background.disabledSocialIcon : undefined}
+                    onClick={(e) => {
+                      e.preventDefault();
+                    }}
+                  />
                 </ListItemIcon>
                 <ListItemText primary={platform.platform} />
               </ButtonBase>
             ))}
           </List>
-        </div>
+        </Box>
+        <IconButton
+          aria-label="delete"
+          color="primary"
+          className={layoutClasses.drawerCloseButton}
+          onClick={() => dispatch(closeMenu())}
+        >
+          <CloseIcon />
+        </IconButton>
       </Drawer>
 
       <Drawer
         anchor="bottom"
-        open={drawerOpen}
+        open={isLinkDetailsModalOpen}
+        PaperProps={{
+          className: layoutClasses.radiusBottomDrawer
+        }}
         onClose={() => {
-          setDrawerOpen(false);
+          dispatch(closeMenu())
           setIsEditing(false);
           setEditingLinkIndex(null);
+          setSelectedPlatform(null)
           reset({
             active: true,
             position: 0,
@@ -314,65 +520,163 @@ const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
           });
         }}
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {isEditing && (
-            <Controller
-              name="active"
-              control={control}
-              defaultValue={false}
-              render={({ field }) => <Switch checked={field.value} onChange={e => setValue('active', e.target.checked)} />}
-            />
-          )}
-
-          <Controller
-            name="url"
-            control={control}
-            defaultValue=""
-            rules={{
-              required: "URL is required",
-              validate: value => {
-                console.log("Validating URL:", value);
-                return validator.isURL(value, { require_protocol: true }) || "Please enter a valid URL";
-              }
-            }}
-            render={({ field }) => (
-              <TextField
-                label="URL"
-                {...field}
-                disabled={!isActive}
-                error={Boolean(errorForUrl)}
-                helperText={errorForUrl?.message}
-                onChange={(e) => {
-                  const inputValue = e.target.value;
-                  if (!inputValue.startsWith("https://") && !inputValue.startsWith("http://")) {
-                    e.target.value = "https://" + inputValue;
-                  }
-                  field.onChange(e);
-                }}
-
-              />
+        <Box p={2}>
+          <Box mb={2}>
+            <Typography variant="h4" align="center">Link Details</Typography>
+          </Box>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {isEditing && (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                flexDirection="column"
+                mb={2}
+              >
+                <Controller
+                  name="active"
+                  control={control}
+                  defaultValue={false}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={field.value}
+                          onChange={e => {
+                            setValue('active', e.target.checked);
+                            field.onChange(e.target.checked);
+                          }}
+                        />
+                      }
+                      label="Active"
+                    />
+                  )}
+                />
+              </Box>
             )}
-          />
 
-          {drawerOpen && !isSocial && (
-            <Controller
-              name="title"
-              control={control}
-              defaultValue=""
-              rules={{
-                required: "Title is required"
-              }}
-              render={({ field: { ref, ...inputProps } }) => (
-                <TextField label="Title" inputRef={ref} {...inputProps} disabled={!isActive} />
-              )}
-            />
-          )}
+            {isSocial && (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                flexDirection="column"
+                mb={2}
+              >
+                <SocialIcon
+                  network={selectedPlatform || ''}
+                  onClick={(e) => {
+                    e.preventDefault();
+                  }}
+                />
+                <Box mt={1}>
+                  <Typography variant="body1" align="center" className={classes.platformTitle}>{selectedPlatform}</Typography>
+                </Box>
+              </Box>
+            )}
 
-          <Button type="submit" disabled={!formState.isValid}>Save</Button>
-        </form>
+            {isLinkDetailsModalOpen && !isSocial && (
+              <Box mb={1}>
+                <Controller
+                  name="title"
+                  control={control}
+                  defaultValue=""
+                  rules={{
+                    required: "Title is required",
+                    validate: value => (value && value.length <= 39) || "Title must be 40 characters or less"
+                  }}
+                  render={({ field: { ref, ...inputProps } }) => (
+                    <TextField
+                      label="Title*"
+                      inputRef={ref}
+                      {...inputProps}
+                      inputProps={{
+                        maxLength: 40
+                      }}
+                      disabled={!isActive}
+                      error={Boolean(errors.title)}
+                      helperText={errors.title?.message}
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+            )}
 
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              flexDirection="column"
+            >
+              <Controller
+                name="url"
+                control={control}
+                defaultValue=""
+                rules={{
+                  required: "URL is required",
+                  validate: value => {
+                    console.log("Validating URL:", value);
+                    return validator.isURL(value, { require_protocol: true }) || "Please enter a valid URL";
+                  }
+                }}
+                render={({ field }) => (
+                  <TextField
+                    label="URL*"
+                    {...field}
+                    disabled={!isActive}
+                    error={Boolean(errors.url)}
+                    helperText={errors.url?.message}
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      if (!inputValue.startsWith("https://") && !inputValue.startsWith("http://")) {
+                        e.target.value = "https://" + inputValue;
+                      }
+                      field.onChange(e);
+                    }}
+                    fullWidth
+                  />
+                )}
+              />
+            </Box>
+
+            <Box mt={2}>
+              <Button
+                type="submit"
+                disabled={!formState.isValid}
+                variant="contained"
+                color="primary"
+                fullWidth
+              >
+                Confirm
+              </Button>
+            </Box>
+          </form>
+        </Box>
+        <IconButton
+          aria-label="delete"
+          color="primary"
+          className={layoutClasses.drawerCloseButton}
+          onClick={() => {
+            dispatch(closeMenu())
+            setIsEditing(false);
+            setEditingLinkIndex(null);
+            setSelectedPlatform(null)
+            reset({
+              active: true,
+              position: 0,
+              isSocial: false,
+              isCustom: false,
+              platform: "",
+              url: "",
+              title: "",
+            });
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
       </Drawer>
-    </div>
+    </Box>
   );
 }
 

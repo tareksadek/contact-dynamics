@@ -329,6 +329,40 @@ export const mapToHubspotCSV = (contacts: ContactType[]) => {
   }));
 }
 
+export const getAuthErrorMessage = (errorCode: string): string => {
+  const errorMessages = {
+    // Common Email/Password authentication errors
+    'auth/invalid-email': "Invalid email format.",
+    'auth/user-disabled': "This account has been disabled. Please contact support.",
+    'auth/user-not-found': "No user found with this email address.",
+    'auth/wrong-password': "Incorrect password. Please try again.",
+    'auth/email-already-in-use': "The email address is already in use by another account.",
+    'auth/operation-not-allowed': "Email/password accounts are not enabled. Please contact support.",
+    'auth/too-many-requests': "Too many unsuccessful login attempts. Please try again later.",
+
+    // Google authentication errors
+    'auth/popup-blocked': "The popup was blocked by the browser. Please allow popups for this website and try again.",
+    'auth/popup-closed-by-user': "The popup was closed before authentication could be completed. Please try again.",
+    'auth/auth-domain-config-required': "Login configuration error. Please contact support.",
+    'auth/cancelled-popup-request': "Another popup request was made before the previous one was finished. Please try again.",
+    'auth/unauthorized-domain': "The domain of this app is not authorized for OAuth operations. Please contact support.",
+    'auth/account-exists-with-different-credential': "An account already exists with the same email address but different sign-in credentials. Sign in using a provider associated with this email address.",
+    'auth/credential-already-in-use': "This credential is already associated with a different user account.",
+    'auth/operation-not-supported-in-this-environment': "This operation is not supported in the environment this application is running on. Try using a different authentication method or contact support.",
+    'auth/timeout': "The operation has timed out. Please try again.",
+
+    // General error
+    'auth/internal-error': "An unexpected error occurred. Please try again.",
+  };
+
+  return errorMessages[errorCode as keyof typeof errorMessages] || "An unexpected error occurred. Please try again.";
+}
+
+export const truncateString = (str: string, length: number = 50) => {
+  return str.length > length ? str.substring(0, length) + "..." : str;
+}
+
+
 // export const createVCF = (profile: ProfileDataType, appDomain: string, profileUrlSuffix: string) => {
 //     const vcf = vCardsJS();
 

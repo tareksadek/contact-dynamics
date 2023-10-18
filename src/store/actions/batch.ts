@@ -18,13 +18,16 @@ import {
   ADD_INVITATIONS_REQUEST,
   ADD_INVITATIONS_SUCCESS,
   ADD_INVITATIONS_FAILURE,
+  DELETE_BATCH_REQUEST,
+  DELETE_BATCH_SUCCESS,
+  DELETE_BATCH_FAILURE,
 } from './actionTypes';
 import { DeleteUserRequest, DeleteUserResponse } from '../../types/user';
 import { functions } from '../../API/firebaseConfig';
 import { httpsCallable, HttpsCallableResult } from '@firebase/functions';
 import { setNotification } from './notificationCenter';
 import { InvitationData, BatchData } from '../../types/userInvitation';
-import { createBatchWithInvitations, updateBatchTitleData, getAllBatches, getBatchById } from '../../API/batch';
+import { createBatchWithInvitations, updateBatchTitleData, getAllBatches, getBatchById, deleteBatchById, checkInvitationsUsed } from '../../API/batch';
 import { getInvitationFromBatchById, resetInvitationData, getAllInvitationsByBatchId, createInvitations } from '../../API/invitations';
 import { startLoading, stopLoading } from './loadingCenter';
 import { AppDispatch, RootState } from '../reducers';
@@ -116,6 +119,20 @@ export interface AddInvitationsFailureAction {
   error: string;
 }
 
+export interface DeleteBatchRequestAction {
+  type: typeof DELETE_BATCH_REQUEST;
+}
+
+export interface DeleteBatchSuccessAction {
+  type: typeof DELETE_BATCH_SUCCESS;
+  batchId: string;
+}
+
+export interface DeleteBatchFailureAction {
+  type: typeof DELETE_BATCH_FAILURE;
+  error: string;
+}
+
 export type BatchActionTypes = 
   | CreateBatchRequestAction
   | CreateBatchSuccessAction
@@ -134,7 +151,10 @@ export type BatchActionTypes =
   | GetAllInvitationsByBatchFailureAction
   | AddInvitationsRequestAction
   | AddInvitationsSuccessAction
-  | AddInvitationsFailureAction;
+  | AddInvitationsFailureAction
+  | DeleteBatchRequestAction
+  | DeleteBatchSuccessAction
+  | DeleteBatchFailureAction;
 
 export const createBatchRequest = () => ({ type: CREATE_BATCH_REQUEST });
 
@@ -163,18 +183,17 @@ export const updateBatchTitleFailure = (error: string): UpdateBatchTitleFailureA
   error
 });
 
-export const resetInvitationRequest = (): ResetInvitationRequestAction => ({
-  type: RESET_INVITATION_REQUEST
+export const deleteBatchRequest = (): DeleteBatchRequestAction => ({
+  type: DELETE_BATCH_REQUEST
 });
 
-export const resetInvitationSuccess = (batchId: string, invitationId: string): ResetInvitationSuccessAction => ({
-  type: RESET_INVITATION_SUCCESS,
-  batchId,
-  invitationId
+export const deleteBatchSuccess = (batchId: string): DeleteBatchSuccessAction => ({
+  type: DELETE_BATCH_SUCCESS,
+  batchId
 });
 
-export const resetInvitationFailure = (error: string): ResetInvitationFailureAction => ({
-  type: RESET_INVITATION_FAILURE,
+export const deleteBatchFailure = (error: string): DeleteBatchFailureAction => ({
+  type: DELETE_BATCH_FAILURE,
   error
 });
 
@@ -221,6 +240,21 @@ export const addInvitationsFailure = (error: string): AddInvitationsFailureActio
   error
 });
 
+export const resetInvitationRequest = (): ResetInvitationRequestAction => ({
+  type: RESET_INVITATION_REQUEST
+});
+
+export const resetInvitationSuccess = (batchId: string, invitationId: string): ResetInvitationSuccessAction => ({
+  type: RESET_INVITATION_SUCCESS,
+  batchId,
+  invitationId
+});
+
+export const resetInvitationFailure = (error: string): ResetInvitationFailureAction => ({
+  type: RESET_INVITATION_FAILURE,
+  error
+});
+
 export const createBatch = (batchData: BatchData, numberOfInvitations: number) => async (dispatch: any) => {
   dispatch(startLoading('Creating batch...'))
   dispatch(createBatchRequest());
@@ -258,11 +292,13 @@ export const updateBatchTitle = (
   batchId: string,
   newTitle: string
 ) => async (dispatch: any) => {
+  dispatch(startLoading('Processing...'))
   dispatch(updateBatchTitleRequest());
   try {
     const { success, error } = await updateBatchTitleData(batchId, newTitle);
     if (success) {
       dispatch(updateBatchTitleSuccess(batchId, newTitle));
+      dispatch(stopLoading())
       dispatch(setNotification({ 
         message: 'Title updated successfully.', 
         type: 'success', 
@@ -271,15 +307,23 @@ export const updateBatchTitle = (
       }));
     } else {
       dispatch(updateBatchTitleFailure(error || 'Failed to update batch title.'));
+      dispatch(stopLoading())
       dispatch(setNotification({ 
         message: 'Error while updating title.', 
         type: 'error', 
         horizontal: 'right', 
         vertical: 'top' 
-    }));
+      }));
     }
   } catch (error) {
+    dispatch(stopLoading())
     dispatch(updateBatchTitleFailure((error as Error).message));
+    dispatch(setNotification({ 
+      message: 'Error while updating title.', 
+      type: 'error', 
+      horizontal: 'right', 
+      vertical: 'top' 
+    }));
   }
 };
 
@@ -490,6 +534,49 @@ export const addInvitations = (batch: BatchData, numberOfInvitations: number, sh
         type: 'error', 
         horizontal: 'right', 
         vertical: 'top' 
+    }));
+  }
+};
+
+export const deleteBatch = (
+  batchId: string,
+) => async (dispatch: any) => {
+  dispatch(startLoading('Processing...'))
+  dispatch(deleteBatchRequest());
+
+  try {
+    if (batchId) {
+      // Call the Cloud Function to delete user data
+      const isAnyInvitationUsed = await checkInvitationsUsed(batchId)
+
+      if (isAnyInvitationUsed) {
+        dispatch(setNotification({ 
+          message: 'This batch can not be deleted.', 
+          type: 'error', 
+          horizontal: 'right', 
+          vertical: 'top' 
+        }));
+        alert("This batch has used invitations, you need to reset any used invitations before you can delete a batch collection.")
+        return
+      }
+
+      dispatch(deleteBatchSuccess(batchId));
+      dispatch(stopLoading())
+      dispatch(setNotification({ 
+        message: 'Batch deleted successfully.', 
+        type: 'success', 
+        horizontal: 'right', 
+        vertical: 'top' 
+      }));
+    }
+  } catch (error) {
+    dispatch(deleteBatchFailure((error as Error).message));
+    dispatch(stopLoading())
+    dispatch(setNotification({ 
+      message: 'Failed to delete batch collection.', 
+      type: 'error', 
+      horizontal: 'right', 
+      vertical: 'top' 
     }));
   }
 };

@@ -1,13 +1,15 @@
-// InvitationDrawer.tsx
-
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Drawer,
   TextField,
   Button,
-  Typography
+  Typography,
+  Box,
+  IconButton
 } from '@mui/material';
+import { layoutStyles } from '../../theme/layout';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface IFormInput {
   numberOfInvitations: number;
@@ -20,14 +22,20 @@ interface Props {
 }
 
 const InvitationDrawer: React.FC<Props> = ({ open, onClose, onSubmit }) => {
+  const layoutClasses = layoutStyles()
   const { control, handleSubmit, formState: { errors, isValid } } = useForm<IFormInput>({ mode: 'onBlur' });
 
   return (
-    <Drawer anchor="bottom" open={open} onClose={onClose}>
-      <div style={{ padding: '20px', width: '300px' }}>
-        <Typography variant="h5" gutterBottom>
-          Add Invitations
-        </Typography>
+    <Drawer
+      anchor="bottom"
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        className: layoutClasses.radiusBottomDrawer
+      }}
+    >
+      <Box p={2}>
+        <Typography variant="h4" align="center">Add Invitations</Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Controller
             name="numberOfInvitations"
@@ -50,11 +58,25 @@ const InvitationDrawer: React.FC<Props> = ({ open, onClose, onSubmit }) => {
               />
             )}
           />
-          <Button type="submit" variant="contained" color="primary" disabled={!isValid}>
-            Add
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={!isValid}
+            fullWidth
+          >
+            Confirm
           </Button>
         </form>
-      </div>
+      </Box>
+      <IconButton
+        aria-label="delete"
+        color="primary"
+        className={layoutClasses.drawerCloseButton}
+        onClick={onClose}
+      >
+        <CloseIcon />
+      </IconButton>
     </Drawer>
   );
 };

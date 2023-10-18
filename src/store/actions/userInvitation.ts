@@ -1,5 +1,4 @@
-import { formatISO } from 'date-fns';
-import { isFirestoreTimestamp, convertFirestoreTimestampToDate } from '../../utilities/utils'
+import { format } from 'date-fns';
 import {
   CHECK_INVITATION_REQUEST,
   CHECK_INVITATION_SUCCESS,
@@ -68,15 +67,18 @@ export const checkInvitationValidity = (batchId: string, invitationId: string) =
 
     const batchData = await getBatchById(batchId) as BatchData;
     const invitationData = await getInvitationFromBatchById(batchId, invitationId) as InvitationData;
+    console.log(batchData);
+    
 
     // Convert Timestamps to ISO string
-    if (invitationData && invitationData.expirationDate && isFirestoreTimestamp(invitationData.expirationDate)) {
-      invitationData.expirationDate = formatISO(convertFirestoreTimestampToDate(invitationData.expirationDate));
+    if (invitationData && invitationData.expirationDate) {
+      invitationData.expirationDate = format(invitationData.expirationDate as Date, 'yyyy-MMM-dd');
     }
     
-    if (batchData && batchData.createdOn && isFirestoreTimestamp(batchData.createdOn)) {
-      batchData.createdOn = formatISO(convertFirestoreTimestampToDate(batchData.createdOn));
+    if (batchData && batchData.createdOn) {
+      batchData.createdOn = format(batchData.createdOn as Date, 'yyyy-MMM-dd');
     }
+
 
     console.log(batchData);
     console.log(invitationData);

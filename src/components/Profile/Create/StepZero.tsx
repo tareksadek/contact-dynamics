@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Button, TextField } from '@mui/material';
+import { Typography, Button, TextField, Box } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { UserType } from '../../../types/user';
 
@@ -25,7 +25,9 @@ const StepZero: React.FC<StepZeroProps> = ({ formStatedata, onSubmit, currentUse
         onSubmit(formData.title)
       })}
     >
-      <Typography variant="h5" gutterBottom>Profile title</Typography>
+      <Box mt={2}>
+        <Typography variant="h4" align="center">Profile title</Typography>
+      </Box>
 
       <div>
         <Controller

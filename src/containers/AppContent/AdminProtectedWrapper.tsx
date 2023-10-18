@@ -17,6 +17,7 @@ const AdminProtectedWrapper: React.FC<AdminProtectedWrapperProps> = ({ children 
     return <LoadingBackdrop 
       message="Authenticating..."
       onComplete={() => true}
+      cubed
     />
   }
 

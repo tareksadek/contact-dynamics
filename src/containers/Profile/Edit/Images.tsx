@@ -5,8 +5,9 @@ import React, {
   useCallback,
   useRef,
 } from 'react';
+import _ from 'lodash';
 import { useSelector, useDispatch } from 'react-redux';
-import { Typography } from '@mui/material';
+import { Typography, Box, Button } from '@mui/material';
 import ProfileImageProcessor from '../../../components/Profile/ProfileImageProcessor';
 import CoverImageProcessor from '../../../components/Profile/CoverImageProcessor';
 import { profileImageDimensions, coverImageDimensions } from '../../../setup/setup';
@@ -14,8 +15,10 @@ import { ImageType } from '../../../types/profile';
 import { RootState, AppDispatch } from '../../../store/reducers';
 import { useRegisterSubmit, SubmitContext } from '../../../contexts/SubmitContext';
 import { updateCoverImageData, updateProfileImageData } from '../../../store/actions/profile';
+import { layoutStyles } from '../../../theme/layout';
 
 const Images: React.FC = () => {
+  const layoutClasses = layoutStyles()
   const authUser = useSelector((state: RootState) => state.authUser);
   const user = useSelector((state: RootState) => state.user.user);
   const appSetup = useSelector((state: RootState) => state.setup.setup);
@@ -25,7 +28,7 @@ const Images: React.FC = () => {
   const registerSubmit = useRegisterSubmit();
   const context = useContext(SubmitContext);
   if (!context) throw new Error('Context not available');
-  const { setFormChanged, setFormValid } = context;
+  const { setFormChanged, setFormValid, formValid, formChanged } = context;
   const dispatch = useDispatch<AppDispatch>();
 
   const [coverImageData, setCoverImageData] = useState<ImageType>({
@@ -46,8 +49,8 @@ const Images: React.FC = () => {
   console.log(profileImageData);
 
   const checkIfImagesChanged = useCallback(() => {
-    const coverImageChanged = JSON.stringify(initialCoverImageData.current) !== JSON.stringify(coverImageData);
-    const profileImageChanged = JSON.stringify(initialProfileImageData.current) !== JSON.stringify(profileImageData);
+    const coverImageChanged = !_.isEqual(initialCoverImageData.current, coverImageData);
+    const profileImageChanged = !_.isEqual(initialProfileImageData.current, profileImageData);
     return { coverImageChanged, profileImageChanged }
   }, [coverImageData, profileImageData]);
 
@@ -103,22 +106,9 @@ const Images: React.FC = () => {
   }, [checkIfImagesChanged, setFormChanged, setFormValid]);
 
   return (
-    <div>
-      {currentUser && !currentUser.isTeamMember && appSetup && appSetup.coverImageData && !appSetup.coverImageData.url && (
-        <div>
-          <Typography variant="h5" gutterBottom>Cover Image</Typography>
-          <CoverImageProcessor
-            isLoading={isLoading}
-            data={coverImageData}
-            setData={setCoverImageData}
-            cropWidth={coverImageDimensions.width}
-            cropHeight={coverImageDimensions.height}
-          />
-        </div>
-      )}
-
-      <div>
-        <Typography variant="h5" gutterBottom>Profile Image</Typography>
+    <Box>
+      <Box pb={2}>
+        <Typography variant="h4" align="center">Profile Picture</Typography>
         <ProfileImageProcessor
           isLoading={isLoading}
           data={profileImageData}
@@ -126,8 +116,38 @@ const Images: React.FC = () => {
           cropWidth={profileImageDimensions.width}
           cropHeight={profileImageDimensions.height}
         />
-      </div>
-    </div>
+      </Box>
+
+      {currentUser && !currentUser.isTeamMember && appSetup && appSetup.coverImageData && !appSetup.coverImageData.url && (
+        <Box mt={2} mb={2}>
+          <Typography variant="h4" align="center">Cover Photo</Typography>
+          <CoverImageProcessor
+            isLoading={isLoading}
+            data={coverImageData}
+            setData={setCoverImageData}
+            cropWidth={coverImageDimensions.width}
+            cropHeight={coverImageDimensions.height}
+          />
+        </Box>
+      )}
+
+      <Box
+          className={layoutClasses.stickyBottomBox}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            disabled={!formValid || !formChanged}
+          >
+            Save
+          </Button>
+        </Box>
+    </Box>
   );
 }
 

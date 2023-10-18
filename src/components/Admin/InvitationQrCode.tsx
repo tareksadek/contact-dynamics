@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Drawer, Button } from '@mui/material';
+import { Drawer, Button, Box, IconButton } from '@mui/material';
 import QRCodeStyling from "qr-code-styling";
 import { appDomain } from '../../setup/setup';
+import { layoutStyles } from '../../theme/layout';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface InvitationQrCodeProps {
   open: boolean;
@@ -20,6 +22,7 @@ const qrCode = new QRCodeStyling({
 });
 
 const InvitationQrCode: React.FC<InvitationQrCodeProps> = ({ open, onClose, invitationId, batchId }) => {
+  const layoutClasses = layoutStyles()
   const [showQrCode, setShowQrCode] = useState(false);
   const qrContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -46,23 +49,53 @@ const InvitationQrCode: React.FC<InvitationQrCodeProps> = ({ open, onClose, invi
     }
   }, [invitationId, batchId, open, showQrCode]);
 
-
-
   return (
-    <Drawer anchor="bottom" open={open} onClose={onClose}>
-      <div>
-        {showQrCode && <div id="qr-container" ref={qrContainerRef} style={{ width: 300, height: 300 }}></div>}
-        <Button onClick={() => qrCode.download({
-            extension: "svg",
-            name: `${invitationId}_${batchId}`
-        })}>Save as SVG</Button>
+    <Drawer
+      anchor="bottom"
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        className: layoutClasses.radiusBottomDrawer
+      }}
+    >
+      <Box>
+        <Box minHeight={200} display="flex" alignItems="center" justifyContent="center" p={2}>
+          {showQrCode && <div id="qr-container" ref={qrContainerRef} style={{ width: 200, height: 200 }}></div>}
+        </Box>
+        <Box display="flex" alignItems="center" justifyContent="center" gap={2} p={2}>
+          <Button
+            onClick={() => qrCode.download({
+              extension: "svg",
+              name: `${invitationId}_${batchId}`
+            })}
+            variant="contained"
+            color="primary"
+            fullWidth
+          >
+            Save as SVG
+          </Button>
 
-        <Button onClick={() => qrCode.download({
-            extension: "png",
-            name: `${invitationId}_${batchId}`
-        })}>Save as PNG</Button>
-
-      </div>
+          <Button
+            onClick={() => qrCode.download({
+              extension: "png",
+              name: `${invitationId}_${batchId}`
+            })}
+            variant="contained"
+            color="primary"
+            fullWidth
+          >
+            Save as PNG
+          </Button>
+        </Box>
+      </Box>
+      <IconButton
+        aria-label="delete"
+        color="primary"
+        className={layoutClasses.drawerCloseButton}
+        onClick={onClose}
+      >
+        <CloseIcon />
+      </IconButton>
     </Drawer>
   );
 };

@@ -229,5 +229,22 @@ exports.decrementContactsCounts = functions.firestore
     });
   });
 
+  exports.deleteBatchInvitations = functions.firestore
+  .document('batches/{batchId}')
+  .onDelete(async (snap, context) => {
+    const batchId = context.params.batchId;
+    const invitationsCollection = admin.firestore().collection(`batches/${batchId}/invitations`);
+
+    // Get all documents from the subcollection
+    const invitationsSnapshot = await invitationsCollection.get();
+
+    // Batched write to delete all documents
+    const batch = admin.firestore().batch();
+    invitationsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+
+    // Commit the batched writes
+    return batch.commit();
+  });
+
 
 

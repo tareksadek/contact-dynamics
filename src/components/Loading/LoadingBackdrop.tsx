@@ -6,7 +6,8 @@ import {
   LoadingBoxStyled,
   ProgressContainerStyled,
   ProgressMessageStyled,
-  ProgressPercentageContainerStyled
+  ProgressPercentageContainerStyled,
+  cubeStyles,
 } from './LoadingBackdropStyles'; // Adjust this path to your actual file
 import { RootState } from '../../store/reducers';
 
@@ -16,6 +17,7 @@ interface LoadingBackdropProps {
   withOpacity?: boolean;
   done?: boolean;
   boxed?: boolean;
+  cubed?: boolean;
   onComplete?: () => void;
   message?: string;
 }
@@ -26,9 +28,11 @@ const LoadingBackdrop: React.FC<LoadingBackdropProps> = ({
   withOpacity = false,
   done = false,
   boxed = false,
+  cubed = false,
   onComplete,
   message,
 }) => {
+  const classes = cubeStyles()
   const isLoading = useSelector((state: RootState) => state.loadingCenter.loadingCounter > 0);
   const currentLoadingMessage = useSelector((state: RootState) => {
     const messages = state.loadingCenter.loadingMessages;
@@ -82,6 +86,22 @@ const LoadingBackdrop: React.FC<LoadingBackdropProps> = ({
   }, [progress, onComplete]);
 
   if (!isLoading && progress === 100) return null;
+
+  if (cubed) {
+    return (
+      <Box className={classes.backdropContainer}>
+        <Box className={classes.cubeWrapper}>
+          <div className={classes.cubeFolding}>
+            <span></span>
+            <span className={classes.leaf2}></span>
+            <span className={classes.leaf3}></span>
+            <span className={classes.leaf4}></span>
+          </div>
+          <Typography variant="body1" align="center" className={classes.loading}>{message || currentLoadingMessage}</Typography>
+        </Box>
+      </Box>
+    )
+  }
 
   return (
     <BackdropStyled boxed={boxed} onClick={() => (clicked ? clicked() : null)}>

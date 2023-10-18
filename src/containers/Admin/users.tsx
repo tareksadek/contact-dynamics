@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Chip, TextField } from '@mui/material';
+import { Box, TextField, Avatar, Typography, Alert } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { DataGrid, GridColDef, GridRowModel, GridCellParams } from '@mui/x-data-grid';
-import DoneIcon from '@mui/icons-material/Done';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { getUsers } from '../../store/actions/users';
 import UserActions from '../../components/Admin/UserActions';
 import { AppDispatch, RootState } from '../../store/reducers';
 import { UserType } from '../../types/user';
 import { resetInvitation } from '../../store/actions/batch';
+import { dataGridStyles } from './styles';
 
 const Users: React.FC = () => {
+  const classes = dataGridStyles()
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const allUsers = useSelector((state: RootState) => state.users.users);
   const [filteredUsers, setFilteredUsers] = useState<UserType[] | null>(null);
   const isLoading = useSelector((state: RootState) => state.loadingCenter.loadingCounter > 0);
-  const { register, watch } = useForm();
-  const searchValue = watch("search", "");
+  const { watch, control } = useForm();
+  const searchTerm = watch("searchTerm", "");
 
   useEffect(() => {
     if (!allUsers) {      
@@ -27,7 +28,7 @@ const Users: React.FC = () => {
   }, [dispatch, allUsers]);
 
   useEffect(() => {
-    const searchLowerCase = searchValue.toLowerCase();
+    const searchLowerCase = searchTerm.toLowerCase();
 
     const filtered = allUsers?.filter(user => 
       user.firstName.toLowerCase().includes(searchLowerCase) || 
@@ -36,7 +37,7 @@ const Users: React.FC = () => {
     );
 
     setFilteredUsers(filtered || null);
-  }, [allUsers, searchValue]);
+  }, [allUsers, searchTerm]);
 
   const handleViewUser = (userId: string) => {
     navigate(`/users/${userId}`)
@@ -54,34 +55,30 @@ const Users: React.FC = () => {
   };
 
   const columns: GridColDef[] = [
-    { field: 'fullName', headerName: 'Name', width: 200 },
-    { field: 'loginEmail', headerName: 'Email', width: 200 },
-    { field: 'createdOn', headerName: 'Created On', width: 200 },
     {
-      field: 'isTeamMaster', 
-      headerName: 'Team Status', 
-      width: 150,
+      field: 'fullName',
+      headerName: 'Full Name',
+      flex: 1,
       renderCell: (params: GridCellParams) => {
-        if (params.row.isTeamMaster) {
-          return <Chip 
-                   icon={<DoneIcon />} 
-                   label="Master" 
-                   style={{backgroundColor: 'green', color: 'white'}} 
-                 />;
-        } else if (params.row.isTeamMember) {
-          return <Chip 
-                   icon={<DoneIcon />} 
-                   label="Member" 
-                   style={{backgroundColor: 'blue', color: 'white'}} 
-                 />;
-        }
-        return <Chip label="Single" />;
+        const names = params.row.fullName ? params.row.fullName.split(' ') : [];
+        const initials = `${names[0] ? names[0][0] : ''}${names[1] ? names[1][0] : ''}`;
+    
+        return (
+          <Box display="flex" alignItems="center">
+            <Avatar className={classes.avatar}>{initials}</Avatar>
+            <Box ml={1}>
+              <Typography variant="body1" className={classes.fullName}>
+                {typeof params.value === 'string' ? params.value : ''}
+              </Typography>
+            </Box>
+          </Box>
+        );
       },
     },
     { 
       field: 'actions', 
-      headerName: 'Actions', 
-      width: 150,
+      headerName: '', 
+      width: 60,
       renderCell: (params: GridRowModel) => (
         <UserActions 
           batchId={params.row.batchId as string}
@@ -100,40 +97,48 @@ const Users: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  if (!filteredUsers || filteredUsers.length === 0) {
-    return <div>No users available.</div>;
-  }
-
   return (
-    <div>
-      <TextField 
-        {...register("search")} 
-        type="text" 
-        placeholder="Search by name or email..." 
-        variant="outlined" 
-        fullWidth
-        margin="normal"
+    <Box minHeight="500px">
+      <Controller
+        name="searchTerm"
+        control={control}
+        defaultValue=""
+        render={({ field }) => (
+          <TextField
+            {...field}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            label="Search name or email..."
+          />
+        )}
       />
-      <div style={{ height: 500, width: '100%' }}>
-        <DataGrid
-          rows={filteredUsers}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
+      {!filteredUsers || filteredUsers.length === 0 ? (
+        <Alert severity="warning">No users available.</Alert>
+      ) : (
+        <Box height={allUsers ? (allUsers.length * 100) - 50 : 400}>
+          <DataGrid
+            rows={filteredUsers}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 25,
+                },
               },
-            },
-          }}
-          pageSizeOptions={[5, 10, 25, 50, 100]}
-          onCellClick={(params) => {
-            if (params.field !== 'actions') {
-              handleViewUser(params.row.id as string);
-            }
-          }}
-        />
-      </div>
-    </div>
+            }}
+            pageSizeOptions={[5, 10, 25, 50, 100]}
+            onCellClick={(params) => {
+              if (params.field !== 'actions') {
+                handleViewUser(params.row.id as string);
+              }
+            }}
+            className={`${classes.gridContainer} ${classes.noHeaderGrid}`}
+          />
+        </Box>
+      )}
+      
+    </Box>
   );
 };
 

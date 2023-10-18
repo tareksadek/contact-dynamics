@@ -1,28 +1,29 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
-import Drawer from '@mui/material/Drawer';
-import { Button, Typography, Grid, Switch } from '@mui/material';
+import { SocialIcon } from 'react-social-icons';
+import { Button, Typography, Grid, Switch, Box, IconButton, Drawer } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { lightTheme, darkTheme } from '../../theme/main';
-import { themeColors, appDefaultTheme, appDefaultColor, appDefaultSocialLinksToSelectedColor, socialPlatforms } from '../../setup/setup';
-import { DefaultLayoutIcon, BusinessLayoutIcon, CardLayoutIcon, SocialLayoutIcon } from '../../Layout/CustomIcons'
-import SocialIcon from './SocialIcon';
-import { StyledIconButton } from './styles';
+import { themeColors, appDefaultTheme, appDefaultColor, appDefaultSocialLinksToSelectedColor } from '../../setup/setup';
+import { DefaultLayoutIcon, BusinessLayoutIcon, CardLayoutIcon, SocialLayoutIcon, SunIcon, MoonIcon } from '../../Layout/CustomIcons'
 import { hexToRgb } from '@mui/material';
 import { StyledSketchPicker } from './styles';
 import { ThemeSettingsType, ColorType } from '../../types/profile';
+import { useTheme } from '../../contexts/ThemeContext';
+import { RootState, AppDispatch } from '../../store/reducers';
+import { openModal, closeMenu } from '../../store/actions/modal';
+import { themeStyles } from './styles';
+import { layoutStyles } from '../../theme/layout';
 
 type ThemeProps = {
   data: ThemeSettingsType;
   setData: React.Dispatch<React.SetStateAction<ThemeSettingsType>>;
-  favoriteColors?: ColorType[] | null; 
-  setFavoriteColors?: React.Dispatch<React.SetStateAction<ColorType[]>> | null; 
+  favoriteColors?: ColorType[] | null;
+  setFavoriteColors?: React.Dispatch<React.SetStateAction<ColorType[]>> | null;
 };
-
-type PlatformType = "facebook" | "instagram" | "linkedin";
-const platforms: PlatformType[] = ['facebook', 'instagram', 'linkedin'];
-
 
 const ThemeCreator: React.FC<ThemeProps> = ({
   data,
@@ -30,34 +31,77 @@ const ThemeCreator: React.FC<ThemeProps> = ({
   favoriteColors,
   setFavoriteColors,
 }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const classes = themeStyles()
+  const layoutClasses = layoutStyles()
   const [selectedColorCode, setSelectedColorCode] = useState<string | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-  const [isPickerOpen, setPickerOpen] = useState(false);
   const [socialLinksToSelectedColor, setSocialLinksToSelectedColor] = useState<boolean>(appDefaultSocialLinksToSelectedColor);
 
   const { register } = useForm();
   const themeColor = selectedTheme && selectedTheme === 'dark' ? darkTheme.palette.background.default : lightTheme.palette.background.default
-  const dataThemeColor = data && data.theme  === 'dark' ? darkTheme.palette.background.default : lightTheme.palette.background.default
+  // const dataThemeColor = data && data.theme  === 'dark' ? darkTheme.palette.background.default : lightTheme.palette.background.default
   const defaultThemeColor = appDefaultTheme === 'dark' ? darkTheme.palette.background.default : lightTheme.palette.background.default;
-  
-  const currentThemeColor = selectedTheme ? themeColor : (data ? dataThemeColor : defaultThemeColor);
+
+  const { setSpecificTheme, theme } = useTheme()
+
+  // const currentThemeColor = selectedTheme ? themeColor : (data ? dataThemeColor : defaultThemeColor);
   const currentColor = selectedColorCode || data.selectedColor.code || appDefaultColor.code
-  const currentTheme = selectedTheme || data.theme ||appDefaultTheme
+  const currentTheme = selectedTheme || theme || data.theme || appDefaultTheme
 
   const layouts = [
-    { name: 'default', icon: DefaultLayoutIcon(themeColor || defaultThemeColor, selectedColorCode || appDefaultColor.code), label: 'Default' },
-    { name: 'business', icon: BusinessLayoutIcon(themeColor || defaultThemeColor, selectedColorCode || appDefaultColor.code), label: 'Business' },
-    { name: 'card', icon: CardLayoutIcon(themeColor || defaultThemeColor, selectedColorCode || appDefaultColor.code), label: 'Card' },
-    { name: 'social', icon: SocialLayoutIcon(themeColor || defaultThemeColor, selectedColorCode || appDefaultColor.code), label: 'Social' },
+    {
+      name: 'default',
+      icon: (
+        <DefaultLayoutIcon
+          background={themeColor || defaultThemeColor}
+          selectedColor={selectedColorCode || appDefaultColor.code}
+        />
+      ),
+      label: 'Default'
+    },
+    {
+      name: 'business',
+      icon: (
+        <BusinessLayoutIcon
+          background={themeColor || defaultThemeColor}
+          selectedColor={selectedColorCode || appDefaultColor.code}
+        />
+      ),
+      label: 'Business'
+    },
+    {
+      name: 'card',
+      icon: (
+        <CardLayoutIcon
+          background={themeColor || defaultThemeColor}
+          selectedColor={selectedColorCode || appDefaultColor.code}
+        />
+      ),
+      label: 'Card'
+    },
+    {
+      name: 'social',
+      icon: (
+        <SocialLayoutIcon
+          background={themeColor || defaultThemeColor}
+          selectedColor={selectedColorCode || appDefaultColor.code}
+        />
+      ),
+      label: 'Social'
+    },
   ];
+
+  const openModalName = useSelector((state: RootState) => state.modal.openModal);
+  const isColorPickerModalOpen = openModalName === 'colorPicker';
 
   const combinedColors = useMemo(() => {
     const favorites = (favoriteColors || []).map(color => ({ name: 'custom', code: color.code }));
-  
+
     if (favorites.length >= 6) {
       return favorites.slice(0, 6);
     }
-  
+
     return [...favorites, ...themeColors.slice(0, 6 - favorites.length)];
   }, [favoriteColors]);
 
@@ -70,10 +114,13 @@ const ThemeCreator: React.FC<ThemeProps> = ({
   const handleSelectLayout = (layout: ThemeSettingsType['layout']) => {
     setData(prev => ({ ...prev, layout }));
   };
-  
+
   const handleSelectTheme = (theme: ThemeSettingsType['theme']) => {
     setSelectedTheme(theme)
     setData(prev => ({ ...prev, theme }));
+    console.log(theme);
+
+    setSpecificTheme(theme)
   };
 
   const handleSocialLinksToSelectedColor = () => {
@@ -88,91 +135,87 @@ const ThemeCreator: React.FC<ThemeProps> = ({
         setFavoriteColors?.((prevColors) => [...prevColors, newColor]);
       }
     }
-    setPickerOpen(false)
+    dispatch(closeMenu())
   };
 
   return (
-    <div>
-      <div>
-        <Typography variant="h5">Select Layout</Typography>
-        <Grid container spacing={2}>
+    <Box>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        flexDirection="column"
+      >
+        <Box mb={2}>
+          <Typography variant="h4" align="center">Select Layout</Typography>
+        </Box>
+        <Grid container spacing={2} className={classes.layoutContainer}>
           {layouts.map((layout) => (
-            <Grid item key={layout.name}>
-              <StyledIconButton
+            <Grid
+              item
+              key={layout.name}
+              className={classes.layoutItem}
+            >
+              <IconButton
                 color={data.layout === layout.name ? 'primary' : 'default'}
                 onClick={() => handleSelectLayout(layout.name as ThemeSettingsType['layout'])}
                 {...register('layout')}
+                className={classes.layoutIcon}
               >
-                <layout.icon background={currentThemeColor} selectedcolor={currentColor} />
-              </StyledIconButton>
-              <Typography align="center">
-                {data.layout === layout.name && <CheckCircleIcon style={{ color: '#000' }} />}
+                {layout.icon}
+              </IconButton>
+              <Typography variant="body1" align="center">
                 {layout.label}
               </Typography>
+              {data.layout === layout.name && (
+                <Box
+                  className={classes.selectedLayoutIconContainer}
+                >
+                  <CheckCircleIcon
+                    className={classes.selectedLayoutIcon}
+                  />
+                </Box>
+              )}
             </Grid>
           ))}
         </Grid>
-      </div>
+      </Box>
 
-      <div>
-        <Typography variant="h5" style={{ marginTop: '16px' }}>Select Theme</Typography>
-        <Grid container spacing={2} alignItems="center">
+      <Box mt={4}>
+        <Box mb={2}>
+          <Typography variant="h4" align="center">Select Theme</Typography>
+        </Box>
+        <Grid container spacing={2} alignItems="center" justifyContent="center">
           <Grid item>
-            <div 
-              style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                backgroundColor: lightTheme.palette.background.default,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid #888'
-              }}
+            <Box
+              className={`${classes.themeIconContainer} ${currentTheme === 'light' ? classes.themeSelectedIconContainer : ''}`}
               onClick={() => handleSelectTheme('light')}
             >
-              {currentTheme === 'light' && <CheckIcon style={{ color: '#000' }} />}
-            </div>
-            <Typography align="center">Light</Typography>
+              <SunIcon />
+            </Box>
           </Grid>
           <Grid item>
-            <div 
-              style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                backgroundColor: darkTheme.palette.background.default,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-              }}
+            <Box
+              className={`${classes.themeIconContainer} ${currentTheme === 'dark' ? classes.themeSelectedIconContainer : ''}`}
               onClick={() => handleSelectTheme('dark')}
             >
-              {currentTheme === 'dark' && <CheckIcon style={{ color: '#fff' }} />}
-            </div>
-            <Typography align="center">Dark</Typography>
+              <MoonIcon />
+            </Box>
           </Grid>
         </Grid>
-      </div>
+      </Box>
 
-      <div>
-        <Typography variant="h5" style={{ marginTop: '16px' }}>Select main color</Typography>
-        <Grid container spacing={2}>
+      <Box mt={4}>
+        <Box mb={2}>
+          <Typography variant="h4" align="center">Select Main Color</Typography>
+        </Box>
+        <Grid container spacing={2} alignItems="center" justifyContent="center">
           {combinedColors.map((color) => (
             <Grid item key={color.code}>
-              <div 
+              <Box
+                className={classes.colorItem}
                 style={{
-                  width: '50px',
-                  height: '50px',
-                  borderRadius: '50%',
                   backgroundColor: color.code,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  position: 'relative'
                 }}
                 onClick={() => {
                   if (typeof color.code === 'string') {
@@ -182,62 +225,132 @@ const ThemeCreator: React.FC<ThemeProps> = ({
                 }}
               >
                 {currentColor === color.code && <CheckIcon style={{ color: '#fff' }} />}
-              </div>
-              <Typography align="center">{color.name}</Typography>
+              </Box>
             </Grid>
           ))}
         </Grid>
-        <Button onClick={() => setPickerOpen(true)}>Pick Color</Button>
-      </div>
+        <Box mt={2}>
+          <Button
+            onClick={() => dispatch(openModal('colorPicker'))}
+            variant="outlined"
+            color="secondary"
+            fullWidth
+          >
+            Pick Color
+          </Button>
+        </Box>
+      </Box>
 
-      <div>
-        <Typography variant="h5" style={{ marginTop: '16px' }}>Social icons color</Typography>
-        
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-          <Typography variant="body1" style={{ marginRight: '8px' }}>Match icons color to selected color:</Typography>
-          <Switch 
-            checked={socialLinksToSelectedColor} 
-            onChange={() => handleSocialLinksToSelectedColor()} 
+      <Box mt={4}>
+        <Box mb={2}>
+          <Typography variant="h4" align="center">Social icons color</Typography>
+        </Box>
+
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          mb={2}
+        >
+          <Typography variant="body1">Match icons color to selected color:</Typography>
+          <Switch
+            checked={socialLinksToSelectedColor}
+            onChange={() => handleSocialLinksToSelectedColor()}
           />
-        </div>
-        
-        <Grid container spacing={2}>
-          {platforms.map(platform => {
-            const platformInfo = socialPlatforms.find(p => p.platform === platform);
-            if (!platformInfo) return null;
-            return (
-              <Grid item key={platform}>
-                <SocialIcon platform={platform} iconColor={socialLinksToSelectedColor ? currentColor : undefined} />
-                <Typography align="center">{platform}</Typography>
-              </Grid>
-            );
-          })}
+        </Box>
+
+        <Grid
+          container
+          spacing={2}
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Grid
+            item
+          >
+            <SocialIcon
+              network="facebook"
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+              style={{ height: 45, width: 45 }}
+              bgColor={socialLinksToSelectedColor ? currentColor : undefined}
+            />
+          </Grid>
+          <Grid
+            item
+          >
+            <SocialIcon
+              network="linkedin"
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+              style={{ height: 45, width: 45 }}
+              bgColor={socialLinksToSelectedColor ? currentColor : undefined}
+            />
+          </Grid>
+          <Grid
+            item
+          >
+            <SocialIcon
+              network="google"
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+              style={{ height: 45, width: 45 }}
+              bgColor={socialLinksToSelectedColor ? currentColor : undefined}
+            />
+          </Grid>
         </Grid>
-      </div>
+      </Box>
 
 
-      <Drawer anchor="bottom" open={isPickerOpen} onClose={() => setPickerOpen(false)}>
-        <StyledSketchPicker 
-            color={selectedColorCode ? hexToRgb(selectedColorCode) : { r: 255, g: 255, b: 255, a: 1 }}
-            onChangeComplete={(color) => {
-                setSelectedColorCode(color.hex);
-                setData(prev => ({ ...prev, selectedColor: { name: 'picker', code: color.hex } }));
-            }}
-            styles={{
-                default: {
-                    picker: {
-                        width: '100%',
-                        boxShadow: 'none',
-                        padding: 0,
-                        margin: 0,
-                        borderRadius: 0,
-                    }
-                }
-            }}
+      <Drawer
+        anchor="bottom"
+        open={isColorPickerModalOpen}
+        onClose={() => dispatch(closeMenu())}
+        PaperProps={{
+          className: layoutClasses.radiusBottomDrawer
+        }}
+      >
+        <StyledSketchPicker
+          color={selectedColorCode ? hexToRgb(selectedColorCode) : { r: 255, g: 255, b: 255, a: 1 }}
+          onChangeComplete={(color) => {
+            setSelectedColorCode(color.hex);
+            setData(prev => ({ ...prev, selectedColor: { name: 'picker', code: color.hex } }));
+          }}
+          styles={{
+            default: {
+              picker: {
+                width: '100%',
+                boxShadow: 'none',
+                padding: 0,
+                margin: 0,
+                borderRadius: 0,
+              }
+            }
+          }}
         />
-        <Button onClick={handleSaveColor}>Save Color</Button>
+        <Box p={2}>
+          <Button
+            onClick={handleSaveColor}
+            variant="contained"
+            color="primary"
+            fullWidth
+          >
+            Add Color
+          </Button>
+        </Box>
+        <IconButton
+          aria-label="delete"
+          color="primary"
+          className={layoutClasses.drawerCloseButton}
+          onClick={() => dispatch(closeMenu())}
+        >
+          <CloseIcon />
+        </IconButton>
       </Drawer>
-    </div>
+    </Box>
   );
 };
 

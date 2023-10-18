@@ -3,7 +3,8 @@ import { useDispatch as useReduxDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, User } from '@firebase/auth';
 import { Timestamp } from '@firebase/firestore';
-import { Button, TextField, Container, Typography } from '@mui/material';
+import { Button, TextField, Container, Typography, Box } from '@mui/material';
+import GoogleIcon from '@mui/icons-material/Google';
 import { useForm } from 'react-hook-form';
 import { RootState, AppDispatch } from '../../store/reducers';
 import { fetchSetup } from '../../store/actions/setup';
@@ -12,6 +13,7 @@ import { generateRandomString } from '../../utilities/utils';
 import { updateInvitation } from '../../API/invitations';
 import { SetupType } from '../../types/setup';
 import { InvitationData, BatchData } from '../../types/userInvitation';
+import { appDomainView } from '../../setup/setup';
 
 const CreateAccount: React.FC = () => {
   const dispatch = useReduxDispatch<AppDispatch>();
@@ -127,87 +129,108 @@ const CreateAccount: React.FC = () => {
   const watchedFirstName = watch('firstName');
   const watchedLastName = watch('lastName');
 
-  const profileUrl = `https://contactdyn.app/${watchedFirstName || '...'}${watchedLastName ? `_${watchedLastName}` : ''}`;
+  const profileUrl = `${appDomainView}/${watchedFirstName || '...'}${watchedLastName ? `_${watchedLastName}` : ''}`;
 
   return (
-    <Container maxWidth="xs">
-      <Typography variant="h4" align="center">Create Account</Typography>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <TextField
-          {...register("firstName", { required: "First name is required" })}
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          label="First Name*"
-        />
-        <Typography color="error">
-          {typeof errors.firstName?.message === 'string' ? errors.firstName.message : null}
-        </Typography>
-
-        <TextField
-          {...register("lastName")}
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          label="Last Name"
-        />
-
-        <TextField
-          {...register("email", {
-            required: "Email is required",
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-              message: "Invalid email format"
-            }
-          })}
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          label="Email Address"
-          type="email"
-        />
-        <Typography color="error">
-          {typeof errors.email?.message === 'string' ? errors.email.message : null}
-        </Typography>
-
-        <TextField
-          {...register("password", {
-            required: "Password is required",
-            minLength: { value: 6, message: "Password must be at least 6 characters long" }
-          })}
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          label="Password"
-          type="password"
-        />
-        <Typography color="error">
-          {typeof errors.password?.message === 'string' ? errors.password.message : null}
-        </Typography>
-
-        <Typography variant="body1">
-          Your profile URL will be: {profileUrl}
-        </Typography>
-
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          color="primary"
-          disabled={!isValid}
+    <Container>
+      <Box pt={2}>
+        <Typography variant="h3" align="center">Welcome to Contact Dynamics</Typography>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+          mt={1}
+          mb={1}
         >
-          Sign Up
-        </Button>
-        <br /><br />
-        <Button
-          onClick={signInWithGoogle}
-          fullWidth
-          variant="outlined"
-          style={{ marginTop: '16px' }} // add some space between the buttons
-        >
-          Sign Up with Google
-        </Button>
-      </form>
+          <img src="/assets/images/welcome.svg" alt="Welcome to Contact Dynamics" />
+        </Box>
+        <Typography variant="h4" align="center">Create Account</Typography>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <TextField
+            {...register("firstName", { required: "First name is required" })}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            label="First Name*"
+          />
+          <Typography color="error">
+            {typeof errors.firstName?.message === 'string' ? errors.firstName.message : null}
+          </Typography>
+
+          <TextField
+            {...register("lastName")}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            label="Last Name"
+          />
+
+          <TextField
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                message: "Invalid email format"
+              }
+            })}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            label="Email Address"
+            type="email"
+          />
+          <Typography color="error">
+            {typeof errors.email?.message === 'string' ? errors.email.message : null}
+          </Typography>
+
+          <TextField
+            {...register("password", {
+              required: "Password is required",
+              minLength: { value: 6, message: "Password must be at least 6 characters long" }
+            })}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            label="Password"
+            type="password"
+          />
+          <Typography color="error">
+            {typeof errors.password?.message === 'string' ? errors.password.message : null}
+          </Typography>
+
+          <Box mt={2} mb={2}>
+            <Typography variant="body1">
+              <b>Your profile URL will be: {profileUrl}</b>
+            </Typography>
+          </Box>
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            disabled={!isValid}
+          >
+            Sign Up
+          </Button>
+
+          <Box mt={2} mb={2}>
+            <Typography variant="body1" align="center">
+              - OR -
+            </Typography>
+          </Box>
+
+          <Button
+            onClick={signInWithGoogle}
+            fullWidth
+            variant="outlined"
+            startIcon={<GoogleIcon />}
+          >
+            Continue with Google
+          </Button>
+        </form>
+      </Box>
     </Container>
   );
 }

@@ -1,12 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { useDispatch } from 'react-redux';
-import { Button, Drawer } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { Button, Drawer, Box, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { setNotification } from '../../store/actions/notificationCenter';
 import ImageCropper from './ImageCropper';
 import { createImage } from '../../utilities/utils';
 import { FirstReadImageDimensionsType } from '../../types/profile';
 import { ImageType } from '../../types/profile';
-import { AppDispatch } from '../../store/reducers';
+import { AppDispatch, RootState } from '../../store/reducers';
+import { layoutStyles } from '../../theme/layout';
+import { imageCropperStyles } from './styles';
+import { openModal, closeMenu } from '../../store/actions/modal';
 
 interface CoverImageProps {
   data: ImageType | null;
@@ -23,15 +28,19 @@ const CoverImageProcessor: React.FC<CoverImageProps> = ({
   cropHeight,
   isLoading,
 }) => {
-  const [profileImageCropperOpen, setProfileImageCropperOpen] = useState(false);
+  const classes = imageCropperStyles()
+  const layoutClasses = layoutStyles()
   const [temporaryImageData, setTemporaryImageData] = useState<string | null>(null);
   const [firstReadImageDimensions, setFirstReadImageDimensions] = useState<FirstReadImageDimensionsType>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dispatch = useDispatch<AppDispatch>();
 
+  const openModalName = useSelector((state: RootState) => state.modal.openModal);
+  const isImageCropperModalOpen = openModalName === 'coverImage';
+
   const closeProfileImageCropper = () => {
-    setProfileImageCropperOpen(false);
+    dispatch(closeMenu())
   }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,14 +61,19 @@ const CoverImageProcessor: React.FC<CoverImageProps> = ({
           setFirstReadImageDimensions({ width: imageRes.width, height: imageRes.height })
         }
         
-        setProfileImageCropperOpen(true);
+        dispatch(openModal('coverImage'))
       };
       reader.readAsDataURL(file);
     }
   };
 
-  console.log(data && data.url);
-  
+  const handleRemoveImage = () => {
+    setData({
+      url: null,
+      blob: null,
+      base64: null
+    });
+  }
   
   if (isLoading) {
     if (data && data.url) {
@@ -69,34 +83,92 @@ const CoverImageProcessor: React.FC<CoverImageProps> = ({
   }
   
   return (
-    <div>
+    <Box>
       {data && data.url ? (
-        <>
-          <img src={data.url} alt="Profile" style={{width: '100%', height: 'auto', maxWidth: cropWidth || 'initial' }} />
-          <Button onClick={() => fileInputRef.current?.click()}>Change Image</Button>
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-        </>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+          mt={2}
+        >
+          <Box className={classes.currentImageContainer}>
+            <img
+              src={data.url}
+              alt="Cover"
+              style={{
+                width: '100%',
+                height: 'auto',
+                borderRadius: 8,
+                maxWidth: cropWidth || 'initial'
+              }}
+            />
+            <IconButton
+              className={classes.delButtonContainer}
+              onClick={handleRemoveImage}
+              color="secondary"
+            >
+              <HighlightOffIcon />
+            </IconButton>
+          </Box>
+          <Box mt={2} width="100%">
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              variant="outlined"
+              color="secondary"
+              fullWidth
+            >
+              Change Image
+            </Button>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          </Box>
+        </Box>
       ) : (
-        <>
-          <Button onClick={() => fileInputRef.current?.click()}>Upload and Crop Image</Button>
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-        </>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+          mt={2}
+        >
+          <Box onClick={() => fileInputRef.current?.click()}>
+            <img src="/assets/images/coverImagePlaceholder.svg" alt="Cover placeholder" />
+          </Box>
+          <Box mt={2} width="100%">
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              variant="outlined"
+              color="secondary"
+              fullWidth
+            >
+              Upload Image
+            </Button>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          </Box>
+        </Box>
       )}
 
-      <Drawer anchor="bottom" open={profileImageCropperOpen} onClose={closeProfileImageCropper}>
-        <div style={{ height: '80vh' }}>
+      <Drawer
+        anchor="bottom"
+        open={isImageCropperModalOpen}
+        onClose={() => dispatch(closeMenu())}
+        PaperProps={{
+          className: layoutClasses.radiusBottomDrawer
+        }}
+      >
+        <Box mt={2}>
           <ImageCropper
             selectedImage={temporaryImageData!}
             desiredWidth={cropWidth}
@@ -111,9 +183,17 @@ const CoverImageProcessor: React.FC<CoverImageProps> = ({
               closeProfileImageCropper();
             }}
           />
-        </div>
+        </Box>
+        <IconButton
+          aria-label="delete"
+          color="primary"
+          className={layoutClasses.drawerCloseButton}
+          onClick={() => dispatch(closeMenu())}
+        >
+          <CloseIcon />
+        </IconButton>
       </Drawer>
-    </div>
+    </Box>
   );
 }
 

@@ -4,7 +4,8 @@ import React, {
   useCallback,
   useContext,
 } from 'react';
-import { Typography } from '@mui/material';
+import _ from 'lodash';
+import { Box, Button } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { RootState, AppDispatch } from '../../../store/reducers';
@@ -12,8 +13,10 @@ import AboutForm from '../../../components/Profile/AboutForm';
 import { AboutFormDataTypes } from '../../../types/profile';
 import { useRegisterSubmit, SubmitContext } from '../../../contexts/SubmitContext';
 import { updateAboutInfoData } from '../../../store/actions/profile';
+import { layoutStyles } from '../../../theme/layout';
 
 const About: React.FC = () => {
+  const layoutClasses = layoutStyles()
   const authUser = useSelector((state: RootState) => state.authUser);
   const user = useSelector((state: RootState) => state.user.user);
   const profile = useSelector((state: RootState) => state.profile.profile);
@@ -21,7 +24,7 @@ const About: React.FC = () => {
   const registerSubmit = useRegisterSubmit();
   const context = useContext(SubmitContext);
   if (!context) throw new Error('Context not available');
-  const { setFormChanged, setFormValid } = context;
+  const { setFormChanged, setFormValid, formValid, formChanged } = context;
   const dispatch = useDispatch<AppDispatch>();
 
   const [currentVideo, setCurrentVideo] = useState<string | null>(null)
@@ -68,21 +71,14 @@ const About: React.FC = () => {
 
   useEffect(() => {
     if (profile && profile.aboutData) {
-      const hasChanged = JSON.stringify(profile.aboutData) !== JSON.stringify(watchedValues);
+      const hasChanged = !_.isEqual(profile.aboutData, watchedValues);
       setFormChanged(hasChanged);
     }
   }, [watchedValues, setFormChanged, profile]);
 
   return (
-    <div>
-      {user && (
-        <>
-          <h1>{user.firstName} {user.lastName}</h1>
-        </>
-      )}
+    <Box>
       <form onSubmit={handleSubmit(handleAboutSubmit)}>
-        <Typography variant="h5" gutterBottom>About Info</Typography>
-
         <AboutForm
           formStatedata={profile ? profile?.aboutData : null}
           loadingData={isLoading}
@@ -94,8 +90,24 @@ const About: React.FC = () => {
           currentUser={user}
           currentVideo={currentVideo}
         />
+        <Box
+          className={layoutClasses.stickyBottomBox}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            disabled={!formValid || !formChanged}
+          >
+            Save
+          </Button>
+        </Box>
       </form> 
-    </div>
+    </Box>
   );
 }
 

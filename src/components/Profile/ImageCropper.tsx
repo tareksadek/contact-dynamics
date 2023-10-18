@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Alert, Box, Button } from '@mui/material';
 import Cropper from 'react-easy-crop';
 import { getCroppedAndCompressedImg } from '../../utilities/utils';
 import { CroppedArea } from '../../types/profile';
@@ -40,13 +41,22 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
 
   return (
     <>
-      <div style={{ width: desiredWidth || '100%', height: desiredHeight || 'auto' }}>
-        {(desiredWidth && desiredHeight) && firstReadImageDimensions && (firstReadImageDimensions.width < desiredWidth || firstReadImageDimensions.height < desiredHeight) && (
-          <div>
+      {(desiredWidth && desiredHeight) && firstReadImageDimensions && (firstReadImageDimensions.width < desiredWidth || firstReadImageDimensions.height < desiredHeight) && (
+        <Box maxWidth={565} display="flex" alignItems="center" justifyContent="center" p={1} style={{ margin: '0 auto' }}>
+          <Alert severity="warning">
             The uploaded image is too small and may not look good when resized. Please consider using a larger image.
-          </div>
-        )}
-        
+          </Alert>
+        </Box>
+      )}
+      <Box
+        style={{
+          // width: desiredWidth || '100%',
+          width: '100%',
+          height: desiredHeight || 'auto',
+          margin: '0 auto',
+          position: 'relative'
+        }}
+      >
         <Cropper
           image={selectedImage}
           crop={crop}
@@ -63,8 +73,27 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
             }
           }}
         />
-      </div>
-      <button onClick={handleConfirmCrop}>Confirm Crop</button>
+      </Box>
+      <Box
+        mt={2}
+        p={2}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        flexDirection="column"
+      >
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          onClick={handleConfirmCrop}
+          style={{
+            maxWidth: 550
+          }}
+        >
+          Confirm Crop
+        </Button>
+      </Box>
     </>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Typography, TextField, CircularProgress } from '@mui/material';
+import { Typography, TextField, CircularProgress, Box } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import ReactPlayer from 'react-player';
 import { isValidVideoUrl } from '../../utilities/utils';
@@ -63,10 +63,12 @@ const AboutForm: React.FC<AboutProps> = ({
   }, [currentVideo]);
 
   return (
-    <div>
+    <Box>
       {appSetup && appSetup.aboutData && !appSetup.aboutData.about && (
-        <div>
-          <Typography variant="h5" gutterBottom>About</Typography>
+        <Box>
+          <Box mt={2}>
+            <Typography variant="h4" align="center">About You</Typography>
+          </Box>
 
           <Controller
             name="about"
@@ -94,13 +96,11 @@ const AboutForm: React.FC<AboutProps> = ({
           <Typography color="error">
             {errors.about && "Your biography must not exceed 500 characters."}
           </Typography>
-        </div>
+        </Box>
       )}
 
       {appSetup && appSetup.aboutData && !appSetup.aboutData.videoUrl && (
-        <div>
-          <Typography variant="h5" gutterBottom>Video</Typography>
-
+        <Box>
           <Controller
             name="videoUrl"
             control={control}
@@ -125,9 +125,9 @@ const AboutForm: React.FC<AboutProps> = ({
           {isValidVideoUrl(videoUrl) && <ReactPlayer url={videoUrl} width="100%" />}
           {feedback && <Typography color="error">{feedback}</Typography>}
 
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }
 

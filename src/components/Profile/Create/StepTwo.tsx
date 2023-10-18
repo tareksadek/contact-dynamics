@@ -1,9 +1,10 @@
 import React from 'react';
-import { Button } from '@mui/material';
+import { Button, Box } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { AboutFormDataTypes } from '../../../types/profile';
 import AboutForm from '../AboutForm';
 import { UserType } from '../../../types/user';
+import { stepsStyles } from './styles';
 
 interface StepTwoProps {
   onPrev: () => void;
@@ -20,42 +21,46 @@ const StepTwo: React.FC<StepTwoProps> = ({
   currentUser,
   isLastStep,
 }) => {
+  const classes = stepsStyles();
   const { register, control, handleSubmit, formState: { errors }, setValue } = useForm<AboutFormDataTypes>();
 
   return (
     <form onSubmit={handleSubmit(formData => {
       onSubmit(formData)
     })}>
-      <div>
-        <AboutForm
-          formStatedata={formStatedata}
-          loadingData={false}
-          control={control}
-          register={register}
-          errors={errors}
-          setValue={setValue}
-          defaultData={null}
-          currentUser={currentUser}
-        />
-      </div>
+      <AboutForm
+        formStatedata={formStatedata}
+        loadingData={false}
+        control={control}
+        register={register}
+        errors={errors}
+        setValue={setValue}
+        defaultData={null}
+        currentUser={currentUser}
+      />
 
-      <Button
-        onClick={onPrev}
-        variant="outlined"
-        color="primary"
-        style={{ marginTop: '16px', marginRight: '16px' }}
+      <Box
+        className={classes.stickyBox}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
       >
-        Previous
-      </Button>
+        <Button
+          onClick={onPrev}
+          variant="outlined"
+          color="primary"
+        >
+          Previous
+        </Button>
 
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        style={{ marginTop: '16px' }}
-      >
-        {isLastStep ? 'Finish' : 'Next'}
-      </Button>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+        >
+          {isLastStep ? 'Finish' : 'Next'}
+        </Button>
+      </Box>
     </form>
   );
 }

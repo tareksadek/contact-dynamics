@@ -17,6 +17,9 @@ import {
   ADD_INVITATIONS_REQUEST,
   ADD_INVITATIONS_SUCCESS,
   ADD_INVITATIONS_FAILURE,
+  DELETE_BATCH_FAILURE,
+  DELETE_BATCH_REQUEST,
+  DELETE_BATCH_SUCCESS,
 } from '../actions/actionTypes';
 
 import {
@@ -33,6 +36,8 @@ import {
   GetAllInvitationsByBatchFailureAction,
   AddInvitationsSuccessAction,
   AddInvitationsFailureAction,
+  DeleteBatchSuccessAction,
+  DeleteBatchFailureAction,
 } from '../actions/batch';
 
 import { BatchData, InvitationData } from '../../types/userInvitation';
@@ -203,6 +208,21 @@ const addInvitationsFailure = (state: typeof initialState, action: AddInvitation
   error: action.error
 });
 
+const deleteBatchRequest = (state: typeof initialState) => updateObj(state, { loading: true });
+
+const deleteBatchFailure = (state: typeof initialState, action: DeleteBatchFailureAction) => updateObj(state, {
+  loading: false,
+  error: action.error
+});
+
+const deleteBatchSuccess = (state = initialState, action: DeleteBatchSuccessAction) => ({
+  ...state,
+  batches: state.batches ? state.batches.filter(batch => batch.id !== action.batchId) : [],
+  selectedBatch: null,
+  loading: false,
+  error: null
+});
+
 
 const batchReducer = (state = initialState, action: BatchActionTypes): typeof initialState => {
   switch (action.type) {
@@ -224,6 +244,9 @@ const batchReducer = (state = initialState, action: BatchActionTypes): typeof in
     case ADD_INVITATIONS_REQUEST: return addInvitationsRequest(state);
     case ADD_INVITATIONS_SUCCESS: return addInvitationsSuccess(state, action);
     case ADD_INVITATIONS_FAILURE: return addInvitationsFailure(state, action);
+    case DELETE_BATCH_REQUEST: return deleteBatchRequest(state);
+    case DELETE_BATCH_SUCCESS: return deleteBatchSuccess(state, action);
+    case DELETE_BATCH_FAILURE: return deleteBatchFailure(state, action);
     default: return state;
   }
 };

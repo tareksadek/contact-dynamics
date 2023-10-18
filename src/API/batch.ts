@@ -1,6 +1,6 @@
 import { Timestamp } from '@firebase/firestore-types';
 import { firestore } from './firebaseConfig';
-import { addDoc, getDocs, collection, doc, getDoc, updateDoc, query } from '@firebase/firestore';
+import { addDoc, getDocs, collection, doc, getDoc, updateDoc, query, deleteDoc, where } from '@firebase/firestore';
 import { BatchData, InvitationData } from '../types/userInvitation';
 import { createInvitations } from './invitations';
 
@@ -83,7 +83,7 @@ export const getAllBatches = async (): Promise<BatchData[] | null> => {
 		batchSnapshot.forEach(doc => {
 			const batch = doc.data() as BatchData;
 			// Convert Firestore Timestamp to JS Date
-			if (batch.createdOn && typeof batch.createdOn !== 'string') {
+			if (batch && batch.createdOn && typeof batch.createdOn !== 'string') {
 				const timestamp = batch.createdOn as unknown as Timestamp;
 				batch.createdOn = new Date(timestamp.seconds * 1000);
 			}
@@ -95,6 +95,32 @@ export const getAllBatches = async (): Promise<BatchData[] | null> => {
 		console.error("Error fetching all batches:", error);
 		return null;
 	}
+};
+
+export const deleteBatchById = async (id: string): Promise<boolean> => {
+  try {
+    const batchDoc = doc(firestore, 'batches', id);
+    await deleteDoc(batchDoc);
+    return true;
+  } catch (error) {
+    console.error("Error deleting batch:", error);
+    return false;
+  }
+};
+
+export const checkInvitationsUsed = async (batchId: string): Promise<boolean> => {
+  try {
+    const batchDocRef = doc(firestore, 'batches', batchId);
+    const invitationsRef = collection(batchDocRef, 'invitations');
+    
+    const queryRef = query(invitationsRef, where('used', '==', true), where('usedBy', '!=', null));
+    const snapshot = await getDocs(queryRef);
+    
+    return !snapshot.empty;  // Returns true if there's at least one matching document
+  } catch (error) {
+    console.error("Error checking invitations:", error);
+    return false;
+  }
 };
 
 export { };

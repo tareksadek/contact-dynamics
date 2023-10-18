@@ -6,7 +6,7 @@ import { fetchUser } from '../store/actions/user';
 import { fetchSetup } from '../store/actions/setup';
 import { AppDispatch } from '../store/reducers';
 import { RootState } from '../store/reducers';
-import useTheme from './useTheme';
+import { useTheme } from '../contexts/ThemeContext';
 
 const useAuth = () => {
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -18,7 +18,7 @@ const useAuth = () => {
   const currentUser = useSelector((state: RootState) => state.user.user);
   const profile = useSelector((state: RootState) => state.profile.profile);
   const dispatch = useDispatch<AppDispatch>();  
-  const { setSpecificTheme, theme } = useTheme()
+  const { setSpecificTheme, theme } = useTheme();
 
   console.log(theme);
   
@@ -57,15 +57,11 @@ const useAuth = () => {
     }
   }, [dispatch, setup, loadingSetup]);
 
-  useEffect(() => {
-    if (profile && profile.themeSettings) {
-      console.log('xxx');
-      console.log(profile.themeSettings.theme);
-      
-      
-      setSpecificTheme(profile.themeSettings.theme)
-    }
-  }, [setSpecificTheme, profile]);
+  // useEffect(() => {
+  //   if (profile && profile.themeSettings) {      
+  //     setSpecificTheme(profile.themeSettings.theme)
+  //   }
+  // }, [setSpecificTheme, profile]);
 
 
   return { loadingAuth, isAdmin };
