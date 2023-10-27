@@ -44,7 +44,7 @@ const MenuLinkIcon = ({ linkfor }: IconForLinkProps) => {
       return <ManageAccountsIcon />;
     case "impact":
       return <EnergySavingsLeafIcon />;
-    case "efficiency":
+    case "analytics":
       return <AnalyticsIcon />;
     case "logout":
       return <LogoutIcon />;

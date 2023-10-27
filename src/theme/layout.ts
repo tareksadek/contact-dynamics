@@ -12,9 +12,21 @@ export const layoutStyles = makeStyles((theme: Theme) => ({
       right: theme.spacing(2),
     },
   },
+  "@keyframes fadeIn": {
+    "0%": {
+      opacity: 0,
+    },
+    "100%": {
+      opacity: 1,
+    },
+  },
   stickyBottomBox: {
     gap: theme.spacing(2),
     paddingBottom: theme.spacing(2),
+    backgroundColor: theme.palette.background.default,
+    zIndex: 2,
+    opacity: 0,
+    animation: `$fadeIn 0.5s forwards`,
     '& button': {
       flex: 1,
     },
@@ -27,4 +39,9 @@ export const layoutStyles = makeStyles((theme: Theme) => ({
       padding: theme.spacing(2),
     },
   },
+  panel: {
+    padding: theme.spacing(2),
+    borderRadius: theme.spacing(1),
+    backgroundColor: theme.palette.background.panel,
+  }
 }));

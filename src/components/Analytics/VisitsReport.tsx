@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { format } from 'date-fns'
-import { Button, Box, Typography, CircularProgress } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import {
+  Typography,
+  Box,
+  CircularProgress,
+  Button,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+} from '@mui/material';
+import { useTheme } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { getVisitsForLast30Days } from '../../API/profile';
 import { RootState } from '../../store/reducers';
 import { VisitType } from '../../types/profile';
 import { ProfileDataType } from '../../types/profile';
+import { analyticsStyles } from './styles';
 
 type VisitsReportProps = {
   selectedUserId?: string | null;
@@ -22,6 +35,8 @@ const VisitsReport: React.FC<VisitsReportProps> = ({
   selectedUserId,
   selectedUserProfile
 }) => {
+  const theme = useTheme()
+  const classes = analyticsStyles()
   const user = useSelector((state: RootState) => state.user.user);
   const stateProfile = useSelector((state: RootState) => state.profile.profile);
 
@@ -32,15 +47,12 @@ const VisitsReport: React.FC<VisitsReportProps> = ({
   const [visitsData, setVisitsData] = useState<{ visitedOn: string; count: number; userId: string; profileId: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  console.log(visitsData);
-
   const groupVisitsByDate = (visits: VisitType[]) => {
     const groupedData: { [key: string]: number } = {};
 
     visits.forEach(visit => {
-      // Ensure visitedOn is a string
-      const visitedOnKey = typeof visit.visitedOn === 'string' 
-        ? visit.visitedOn 
+      const visitedOnKey = typeof visit.visitedOn === 'string'
+        ? visit.visitedOn
         : format(visit.visitedOn, 'dd/MM/yyyy');
 
       if (groupedData[visitedOnKey]) {
@@ -55,8 +67,8 @@ const VisitsReport: React.FC<VisitsReportProps> = ({
 
   useEffect(() => {
     const fetchVisits = async () => {
-      setLoading(true); 
-  
+      setLoading(true);
+
       if (userId && profile && profile.id) {
         const rawData = await getVisitsForLast30Days(userId, profile.id);
         const data: VisitType[] = rawData.map((doc: any) => ({
@@ -64,14 +76,14 @@ const VisitsReport: React.FC<VisitsReportProps> = ({
           profileId: doc.profileId,
           visitedOn: format(doc.visitedOn.toDate(), 'dd/MM/yyyy')
         }));
-  
+
         const transformedData = groupVisitsByDate(data);
         const enrichedTransformedData = transformedData.map(item => ({
           ...item,
           userId: userId,
           profileId: profile.id || ''
         }));
-  
+
         if (selectedPeriod === TimePeriods.THIS_WEEK) {
           // Note: Depending on your definition of "This Week", you can adjust this logic.
           const last7days = Array.from({ length: 7 }, (_, i) => format(new Date(Date.now() - i * 24 * 60 * 60 * 1000), 'dd/MM/yyyy'));
@@ -86,50 +98,86 @@ const VisitsReport: React.FC<VisitsReportProps> = ({
           setVisitsData(enrichedTransformedData);
         }
       }
-  
+
       setLoading(false);
     };
-  
+
     fetchVisits();
   }, [selectedPeriod, userId, profile]);
-  
-  
 
   return (
-    <Box p={3} border={1} borderColor="divider" borderRadius={2}>
-      <Typography variant="h6">Visits Report</Typography>
-      {profile&& (
-        <Box mt={2}>
-          <Typography>Total Visits: {profile.visits || 0}</Typography>
-        </Box>
-      )}
-      {loading ? (
-        <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
-          <CircularProgress />
-          <Typography mt={2}>Creating visits chart...</Typography>
-        </Box>
-      ) : (
-        <>
-          <Box mt={2}>
-            <Button onClick={() => setSelectedPeriod(TimePeriods.THIS_WEEK)}>{TimePeriods.THIS_WEEK}</Button>
-            <Button onClick={() => setSelectedPeriod(TimePeriods.THIS_MONTH)}>{TimePeriods.THIS_MONTH}</Button>
-          </Box>
-          {visitsData && visitsData.length === 0 ? (
-            <div>Not enough data to draw visits chart</div>
-          ) : (
-            <Box mt={2} width={500} height={300}>
-              <LineChart width={500} height={300} data={visitsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="visitedOn" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="count" stroke="#8884d8" activeDot={{ r: 8 }} />
-              </LineChart>
+    <Box>
+      <Box pb={2} className={classes.visitsContainer}>
+        <Accordion defaultExpanded>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1bh-content"
+            id="panel1bh-header"
+          >
+            <Typography variant="body1" align="left">Visits Breakdown</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box>
+              {profile && (
+                <Box className={classes.totalVisits}>
+                  <Typography variant="body1" align='center'>
+                    {profile.visits || 0}
+                  </Typography>
+                  <Typography variant="body1" align='center'>Total Visits</Typography>
+                </Box>
+              )}
+
+              {loading ? (
+                <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
+                  <CircularProgress style={{ color: theme.palette.background.avatar }} />
+                  <Typography variant="body1" align='center' mt={2}>Creating chart...</Typography>
+                </Box>
+              ) : (
+                <Box>
+                  <Box
+                    mt={2}
+                    gap={2}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Button
+                      onClick={() => setSelectedPeriod(TimePeriods.THIS_WEEK)}
+                      startIcon={selectedPeriod === TimePeriods.THIS_WEEK ? <CheckCircleIcon /> : undefined}
+                    >
+                      {TimePeriods.THIS_WEEK}
+                    </Button>
+                    <Button
+                      onClick={() => setSelectedPeriod(TimePeriods.THIS_MONTH)}
+                      startIcon={selectedPeriod === TimePeriods.THIS_MONTH ? <CheckCircleIcon /> : undefined}
+                    >
+                      {TimePeriods.THIS_MONTH}
+                    </Button>
+                  </Box>
+                  {visitsData && visitsData.length === 0 ? (
+                    <Alert severity="warning">Not enough data in the selected period to draw a chart.</Alert>
+                  ) : (
+                    <Box mt={2} width="100%" height={300}>
+                      <ResponsiveContainer width="100%" height={300} className={classes.lineChartContainer}>
+                        <LineChart data={visitsData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="visitedOn" />
+                          <YAxis />
+                          <Tooltip />
+                          <Line type="monotone" dataKey="count" stroke={theme.palette.background.blue} activeDot={{ r: 8 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </Box>
+                  )}
+                </Box>
+              )}
             </Box>
-          )}
-        </>
-      )}
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Box>
+
+
   );
 };
 

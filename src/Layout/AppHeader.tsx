@@ -9,8 +9,7 @@ import {
   Button,
   Slide
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import QrCodeIcon from "@mui/icons-material/QrCode";
+import { MenuIcon, QrIcon, Logo } from './CustomIcons';
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { useSubmit, SubmitContext } from '../contexts/SubmitContext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -73,6 +72,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     }
 
     switch (pathname) {
+      case "/createProfile":
+        return "Create Card";
       case "/info":
         return "Info";
       case "/about":
@@ -85,8 +86,18 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         return "Links";
       case "/contacts":
         return "Contacts";
+      case "/contactForm":
+        return "Contact Form";
       case "/efficiency":
-        return "Digital Card Report";
+        return "Card Analytics";
+      case "/impact":
+        return "Environmental Impact";
+      case "/share":
+        return "Card Share";
+      case "/qrcode":
+        return "QR Code";
+      case "/redirect":
+        return "Card Redirect";
       case "/adminDashboard":
         return "Dashboard";
       case "/batches":
@@ -122,12 +133,23 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     <>
       <HideOnScroll>
         <AppBar
-          position="sticky"
+          position={isProfilePage ? 'fixed' : 'sticky'}
           classes={{
-            root: classes.appBarRoot
+            root: `${classes.appBarRoot} ${isProfilePage ? classes.profileAppBar : ''}`
           }}
         >
           <Toolbar>
+            {isProfilePage && (
+              <IconButton
+                edge="end"
+                aria-label="qr-code"
+                onClick={onBackClick}
+                className={classes.appBarButtons}
+              >
+                <Logo />
+              </IconButton>
+            )}
+
             {userUrlSuffix && !isProfilePage && (
               <IconButton
                 edge="start"
@@ -140,7 +162,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             )}
 
             {!isProfilePage && (
-              <Typography variant="body1" style={{ flexGrow: 1, textTransform: 'capitalize' }}>
+              <Typography variant="body1" style={{ flexGrow: 1, textTransform: 'capitalize' }} onClick={onBackClick}>
                 {currentTitle}
               </Typography>
             )}
@@ -151,12 +173,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 aria-label="qr-code"
                 style={{
                   marginLeft: 'auto',
-                  marginRight: 0
+                  marginRight: 16
                 }}
                 onClick={handleQrClick}
                 className={classes.appBarButtons}
               >
-                <QrCodeIcon />
+                <QrIcon />
               </IconButton>
             ) : shouldShowSaveButton(location!.pathname) && (
               <Button
@@ -174,6 +196,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 aria-label="menu"
                 onClick={onMenuButtonClick}
                 className={classes.appBarButtons}
+                style={{
+                  marginLeft: 0,
+                }}
               >
                 <MenuIcon />
               </IconButton>

@@ -1,9 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Modal } from '@mui/material';
+import { Drawer, Box, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import QRCodeStyling from "qr-code-styling";
 import { appDomain } from '../../../setup/setup';
 import { RootState } from '../../../store/reducers';
+import { layoutStyles } from '../../../theme/layout';
 
 interface InvitationQrCodeProps {
   open: boolean;
@@ -20,6 +22,7 @@ const qrCode = new QRCodeStyling({
 });
 
 const QrDrawer: React.FC<InvitationQrCodeProps> = ({ open, onClose }) => {
+  const layoutClasses = layoutStyles()
   const user = useSelector((state: RootState) => state.user.user);
   const [showQrCode, setShowQrCode] = useState(false);
   const qrContainerRef = useRef<HTMLDivElement | null>(null);
@@ -48,11 +51,33 @@ const QrDrawer: React.FC<InvitationQrCodeProps> = ({ open, onClose }) => {
   }, [open, showQrCode, user?.profileUrlSuffix]);
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <div style={{ width: '100%', height: '100%', backgroundColor: '#fff' }}>
-        {showQrCode && <div id="qr-container" ref={qrContainerRef} style={{ width: 300, height: 300 }}></div>}
-      </div>
-    </Modal>
+    <Drawer
+      anchor="bottom"
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        className: layoutClasses.radiusBottomDrawer
+      }}
+    >
+      <Box
+        minHeight={450}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Box width={200} height={200}>
+          {showQrCode && <div id="qr-container" ref={qrContainerRef} style={{ width: 200, height: 200 }}></div>}
+        </Box>
+      </Box>
+      <IconButton
+        aria-label="delete"
+        color="primary"
+        className={layoutClasses.drawerCloseButton}
+        onClick={onClose}
+      >
+        <CloseIcon />
+      </IconButton>
+    </Drawer>
   );
 };
 

@@ -11,12 +11,14 @@ export const appStyles = makeStyles((theme: Theme) => ({
   },
   contentContainer: {
     maxWidth: '550px !important',
-    paddingTop: theme.spacing(2),
-  }
+    // paddingTop: theme.spacing(2),
+    padding: '0 !important',
+  },
 }));
 
 export const appHeaderStyles = makeStyles((theme: Theme) => ({
   appBarButtons: {},
+  profileAppBar: {},
   appBarRoot: {
     backgroundColor: `${theme.palette.background.default} !important`,
     backgroundImage: 'none !important',
@@ -26,6 +28,35 @@ export const appHeaderStyles = makeStyles((theme: Theme) => ({
     '& $appBarButtons': {
       backgroundColor: theme.palette.background.default,
       color: theme.palette.background.headerButtons,
+      '& svg': {
+        fontSize: '1.5rem',
+      }
+    },
+    '&$profileAppBar': {
+      backgroundColor: 'transparent !important',
+      maxWidth: 550,
+      margin: 'auto',
+      left: 0,
+      right: 0,
+    }
+  },
+}));
+
+export const saveButtonStyles = makeStyles((theme: Theme) => ({
+  saveButtonSuccess: {},
+  saveButtonError: {},
+  saveButton: {
+    '&$saveButtonSuccess': {
+      backgroundColor: `${theme.palette.background.green} !important`,
+      '& svg': {
+        color: '#fff !important'
+      }
+    },
+    '&$saveButtonError': {
+      backgroundColor: `${theme.palette.background.danger} !important`,
+      '& svg': {
+        color: '#fff !important'
+      }
     },
   },
 }));

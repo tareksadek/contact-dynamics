@@ -1,32 +1,62 @@
 import { Timestamp } from '@firebase/firestore-types';
 import { firestore } from './firebaseConfig';
-import { getDoc, getDocs, collection, doc, updateDoc, query, addDoc, orderBy } from '@firebase/firestore';
+import { getDoc, onSnapshot, collection, doc, updateDoc, query, addDoc, orderBy } from '@firebase/firestore';
 import { InvitationData } from '../types/userInvitation';
-import { getBatchById } from './batch';
-import { BatchData } from '../types/userInvitation'; 
+// import { getBatchById } from './batch';
+import { BatchData } from '../types/userInvitation';
 
-export const getInvitationFromBatchById = async (batchId: string, invitationId: string) => {
-	try {
+// export const getInvitationFromBatchById = async (batchId: string, invitationId: string) => {
+// 	try {
+// 		const invitationRef = doc(firestore, 'batches', batchId, 'invitations', invitationId);
+// 		const invitationDoc = await getDoc(invitationRef);
+
+// 		if (invitationDoc.exists()) {
+// 			const data = invitationDoc.data();
+// 			if (data && data.expirationDate && typeof data.expirationDate !== 'string') {
+// 				const timestamp = data.expirationDate as unknown as Timestamp;
+// 				data.expirationDate = new Date(timestamp.seconds * 1000);
+// 			}
+// 			return {
+// 				id: invitationDoc.id,
+// 				...data
+// 			};
+// 		} else {
+// 			return null;
+// 		}
+// 	} catch (error) {
+// 		console.error("Error fetching invitation from batch by ID:", error);
+// 		throw error;
+// 	}
+// };
+
+export const getInvitationFromBatchById = (batchId: string, invitationId: string): Promise<InvitationData | null> => {
+	return new Promise<InvitationData | null>((resolve, reject) => {
 		const invitationRef = doc(firestore, 'batches', batchId, 'invitations', invitationId);
-		const invitationDoc = await getDoc(invitationRef);
 
-		if (invitationDoc.exists()) {
-			const data = invitationDoc.data();
-			if (data && data.expirationDate && typeof data.expirationDate !== 'string') {
-				const timestamp = data.expirationDate as unknown as Timestamp;
-				data.expirationDate = new Date(timestamp.seconds * 1000);
+		const unsubscribe = onSnapshot(invitationRef, docSnapshot => {
+			if (docSnapshot.exists()) {
+				const data = docSnapshot.data() as Partial<InvitationData>;
+				if (data.expirationDate && typeof data.expirationDate !== 'string') {
+					const timestamp = data.expirationDate as unknown as Timestamp;
+					data.expirationDate = new Date(timestamp.seconds * 1000);
+				}
+				const result: InvitationData = {
+					...data,
+					id: docSnapshot.id
+				} as InvitationData;
+				// Once data is fetched, unsubscribe from further changes and resolve the promise
+				unsubscribe();
+				resolve(result);
+			} else {
+				// No data found, unsubscribe and resolve with null
+				unsubscribe();
+				resolve(null);
 			}
-			return {
-				id: invitationDoc.id,
-				...data
-			};
-		} else {
-			return null;
-		}
-	} catch (error) {
-		console.error("Error fetching invitation from batch by ID:", error);
-		throw error;
-	}
+		}, error => {
+			console.error("Error fetching invitation from batch by ID:", error);
+			reject(error); // if there's an error, reject the promise with that error
+		});
+	});
 };
 
 export const updateInvitation = async (batchId: string, invitationId: string, updatedData: any) => {
@@ -40,16 +70,56 @@ export const updateInvitation = async (batchId: string, invitationId: string, up
 	}
 };
 
-export const getAllInvitationsByBatchId = async (batchId: string): Promise<InvitationData[] | null> => {
-	try {
+// export const getAllInvitationsByBatchId = async (batchId: string): Promise<InvitationData[] | null> => {
+// 	try {
+// 		const invitationsQuery = query(
+// 			collection(firestore, 'batches', batchId, 'invitations'),
+// 			orderBy('used', 'desc')
+// 		);
+// 		const invitationSnapshot = await getDocs(invitationsQuery);
+
+// 		const invitations: InvitationData[] = [];
+// 		invitationSnapshot.forEach(doc => {
+// 				const invitation = doc.data() as InvitationData;
+
+// 				if (invitation.expirationDate && typeof invitation.expirationDate !== 'string') {
+// 					const timestamp = invitation.expirationDate as unknown as Timestamp;
+// 					invitation.expirationDate = new Date(timestamp.seconds * 1000);
+// 				}
+
+// 				if (invitation.usedOn && typeof invitation.usedOn !== 'string') {
+// 					const timestamp = invitation.usedOn as unknown as Timestamp;
+// 					invitation.usedOn = new Date(timestamp.seconds * 1000);
+// 				}
+
+// 		    invitations.push({
+// 		        ...invitation,
+// 						id: doc.id,
+// 		    });
+// 		});
+
+// 		invitations.sort((a, b) => {
+// 			if (a.used && !b.used) return -1;
+// 			if (!a.used && b.used) return 1;
+// 			return 0;
+// 		});
+// 		return invitations;
+// 	} catch (error) {
+// 		console.error("Error fetching invitations by batch ID:", error);
+// 		return null;
+// 	}
+// };
+
+export const getAllInvitationsByBatchId = (batchId: string): Promise<InvitationData[] | null> => {
+	return new Promise<InvitationData[] | null>((resolve, reject) => {
 		const invitationsQuery = query(
 			collection(firestore, 'batches', batchId, 'invitations'),
 			orderBy('used', 'desc')
 		);
-		const invitationSnapshot = await getDocs(invitationsQuery);
 
-		const invitations: InvitationData[] = [];
-		invitationSnapshot.forEach(doc => {
+		const unsubscribe = onSnapshot(invitationsQuery, snapshot => {
+			const invitations: InvitationData[] = [];
+			snapshot.forEach(doc => {
 				const invitation = doc.data() as InvitationData;
 
 				if (invitation.expirationDate && typeof invitation.expirationDate !== 'string') {
@@ -62,22 +132,26 @@ export const getAllInvitationsByBatchId = async (batchId: string): Promise<Invit
 					invitation.usedOn = new Date(timestamp.seconds * 1000);
 				}
 
-		    invitations.push({
-		        ...invitation,
-						id: doc.id,
-		    });
-		});
+				invitations.push({
+					...invitation,
+					id: doc.id,
+				});
+			});
 
-		invitations.sort((a, b) => {
-			if (a.used && !b.used) return -1;
-			if (!a.used && b.used) return 1;
-			return 0;
+			invitations.sort((a, b) => {
+				if (a.used && !b.used) return -1;
+				if (!a.used && b.used) return 1;
+				return 0;
+			});
+
+			// Once data is fetched, unsubscribe from further changes and resolve the promise
+			unsubscribe();
+			resolve(invitations);
+		}, error => {
+			console.error("Error fetching invitations by batch ID:", error);
+			reject(null);
 		});
-		return invitations;
-	} catch (error) {
-		console.error("Error fetching invitations by batch ID:", error);
-		return null;
-	}
+	});
 };
 
 export const resetInvitationData = async (
@@ -102,65 +176,65 @@ export const resetInvitationData = async (
 };
 
 export const createInvitations = async (
-  batch: BatchData | null,
-  numberOfInvitations: number,
-  shouldCreateMaster: boolean
+	batch: BatchData | null,
+	numberOfInvitations: number,
+	shouldCreateMaster: boolean
 ): Promise<InvitationData[]> => {
-  const createdInvitations: InvitationData[] = [];
+	const createdInvitations: InvitationData[] = [];
 
 	if (!batch || !batch.id) {
 		throw new Error('Batch not found');
 	}
 
-  try {
-    const invitationsCollection = collection(firestore, 'batches', batch.id, 'invitations');
-    const expirationDate = new Date();
-    expirationDate.setFullYear(expirationDate.getFullYear() + 1); // Set to one year from now
+	try {
+		const invitationsCollection = collection(firestore, 'batches', batch.id, 'invitations');
+		const expirationDate = new Date();
+		expirationDate.setFullYear(expirationDate.getFullYear() + 1); // Set to one year from now
 
-    // Determine if we've already created a master invitation
-    let masterCreated = false;
+		// Determine if we've already created a master invitation
+		let masterCreated = false;
 
-    for (let i = 0; i < numberOfInvitations; i++) {
-      const newInvitation: InvitationData = {
-        used: false,
-        usedOn: null,
-        usedBy: null,
-        connected: false,
-        type: batch.isTeams ? 'teams' : 'default',
-        isMaster: false,
-        expirationDate: expirationDate // Store as ISO string for consistent format
-      };
+		for (let i = 0; i < numberOfInvitations; i++) {
+			const newInvitation: InvitationData = {
+				used: false,
+				usedOn: null,
+				usedBy: null,
+				connected: false,
+				type: batch.isTeams ? 'teams' : 'default',
+				isMaster: false,
+				expirationDate: expirationDate // Store as ISO string for consistent format
+			};
 
-      // If a master invitation is requested and we haven't created one yet
-      if (shouldCreateMaster && !masterCreated) {
-        newInvitation.isMaster = true;
-        masterCreated = true;
-      }
+			// If a master invitation is requested and we haven't created one yet
+			if (shouldCreateMaster && !masterCreated) {
+				newInvitation.isMaster = true;
+				masterCreated = true;
+			}
 
 			console.log(newInvitation);
-			
 
-      const docRef = await addDoc(invitationsCollection, newInvitation);
-      
-      const createdInvitation = {
-        ...newInvitation,
-        id: docRef.id
-      };
 
-      // Transform the date as required
-      if (createdInvitation.expirationDate && typeof createdInvitation.expirationDate !== 'string') {
-        const timestamp = createdInvitation.expirationDate as unknown as Timestamp;
-        createdInvitation.expirationDate = new Date(timestamp.seconds * 1000);
-      }
+			const docRef = await addDoc(invitationsCollection, newInvitation);
 
-      createdInvitations.push(createdInvitation);
-    }
+			const createdInvitation = {
+				...newInvitation,
+				id: docRef.id
+			};
 
-    return createdInvitations;
-  } catch (error) {
-    console.log(error);
-    throw error; // Re-throw the error to be caught in the calling function.
-  }
+			// Transform the date as required
+			if (createdInvitation.expirationDate && typeof createdInvitation.expirationDate !== 'string') {
+				const timestamp = createdInvitation.expirationDate as unknown as Timestamp;
+				createdInvitation.expirationDate = new Date(timestamp.seconds * 1000);
+			}
+
+			createdInvitations.push(createdInvitation);
+		}
+
+		return createdInvitations;
+	} catch (error) {
+		console.log(error);
+		throw error; // Re-throw the error to be caught in the calling function.
+	}
 };
 
 export { };

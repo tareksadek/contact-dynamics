@@ -63,7 +63,7 @@ const Images: React.FC = () => {
     if (imagesChanged.coverImageChanged && coverImageData.url) {
       const updatedCoverImage = {
         url: coverImageData.url,
-        base64: coverImageData.base64 || '', 
+        base64: coverImageData.base64 || '',
         blob: coverImageData.blob || new Blob(),
       };
       dispatch(updateCoverImageData(authUser?.userId, user.activeProfileId, updatedCoverImage))
@@ -80,7 +80,7 @@ const Images: React.FC = () => {
 
     console.log(coverImageData);
     console.log(profileImageData);
-    
+
   }, [authUser?.userId, user, coverImageData, profileImageData, checkIfImagesChanged, dispatch]);
 
   useEffect(() => {
@@ -106,7 +106,7 @@ const Images: React.FC = () => {
   }, [checkIfImagesChanged, setFormChanged, setFormValid]);
 
   return (
-    <Box>
+    <Box p={2}>
       <Box pb={2}>
         <Typography variant="h4" align="center">Profile Picture</Typography>
         <ProfileImageProcessor
@@ -131,7 +131,8 @@ const Images: React.FC = () => {
         </Box>
       )}
 
-      <Box
+      {formChanged && (
+        <Box
           className={layoutClasses.stickyBottomBox}
           display="flex"
           justifyContent="center"
@@ -147,6 +148,7 @@ const Images: React.FC = () => {
             Save
           </Button>
         </Box>
+      )}
     </Box>
   );
 }

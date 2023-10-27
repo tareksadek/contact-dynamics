@@ -23,7 +23,7 @@ const Notification: React.FC = () => {
   return (
     <>
       {isOpen && notification && (
-        <Snackbar open={isOpen} autoHideDuration={4000} onClose={handleClose} anchorOrigin={{ horizontal, vertical }}>
+        <Snackbar open={isOpen} autoHideDuration={2000} onClose={handleClose} anchorOrigin={{ horizontal, vertical }}>
           <Alert onClose={handleClose} severity={notification.type}>
             {notification.message}
           </Alert>

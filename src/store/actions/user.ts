@@ -204,22 +204,22 @@ export const fetchUserByProfileSuffix = (profileSuffix: string) => async (dispat
 };
 
 export const redirectUser = (userId: string, redirect: RedirectType) => async (dispatch: any) => {
-  dispatch(startLoading('Redirecting...'))
+  // dispatch(startLoading('Redirecting...'))
   dispatch(redirectUserRequest());
   
   try {
     const response = await redirectUserProfiles(userId, redirect.active, redirect.url || '');
     if (response.success) {
       dispatch(redirectUserSuccess(redirect));
-      dispatch(stopLoading())
-      dispatch(setNotification({ message: 'Redirected successfully', type: 'success', horizontal: 'right', vertical: 'top' }));
+      // dispatch(stopLoading())
+      dispatch(setNotification({ message: redirect.active ? 'Redirected successfully' : 'Redirecting disabled successfully', type: 'success', horizontal: 'right', vertical: 'top' }));
     } else {
-      dispatch(stopLoading())
+      // dispatch(stopLoading())
       throw new Error('Failed to redirect');
     }
   } catch (err) {
     console.log(err);
-    dispatch(stopLoading())
+    // dispatch(stopLoading())
     dispatch(redirectUserFailure((err as Error).message));
     dispatch(setNotification({ message: 'Failed to redirect', type: 'error', horizontal: 'right', vertical: 'top' }));
   }

@@ -1,13 +1,11 @@
 import React, { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store/reducers';
-import { Dialog, DialogContent, List, ListItem, ListItemText, Box, ListItemButton } from '@mui/material';
+import { Dialog, DialogContent, Button, Box, Typography } from '@mui/material';
 import { switchProfile } from '../store/actions/profile';
 import { closeMenu } from '../store/actions/modal';
-import { sideMenuStyles } from './appStyles';
 
 const ProfileSwitcherDialog: React.FC = () => {
-  const classes = sideMenuStyles()
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user.user);
   const openModalName = useSelector((state: RootState) => state.modal.openModal);
@@ -33,27 +31,23 @@ const ProfileSwitcherDialog: React.FC = () => {
       maxWidth={false}
     >
       <DialogContent>
+        <Typography variant="body1" align="center">Select a Profile</Typography>
         <Box maxWidth={550} margin="auto" width="100%">
-          <List>
+          <Box>
             {user?.profileList?.map((p) => (
-              <ListItem
-                key={p.profileId}
-                className={classes.switchDialogButton}
-              >
-                <ListItemButton
+              <Box key={p.profileId} mt={1} mb={1} width="100%" minWidth={250}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
                   disabled={p.profileId === user?.activeProfileId}
                   onClick={() => switchActiveProfile(p.profileId)}
                 >
-                  <ListItemText
-                    primary={p.profileTitle}
-                    primaryTypographyProps={{
-                      align: 'center'
-                    }}
-                  />
-                </ListItemButton>
-              </ListItem>
+                  {p.profileTitle}
+                </Button>
+              </Box>
             ))}
-          </List>
+          </Box>
         </Box>
       </DialogContent>
     </Dialog>

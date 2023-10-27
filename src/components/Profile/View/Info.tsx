@@ -6,8 +6,10 @@ import MailIcon from '@mui/icons-material/Mail';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import GoogleMapDisplay from '../GoogleMapDisplay';
+import { profileInfoStyles } from './styles';
 
 const Info: React.FC = () => {
+  const classes = profileInfoStyles()
   const setup = useSelector((state: RootState) => state.setup.setup);
   const profile = useSelector((state: RootState) => state.profile.profile);
 
@@ -26,90 +28,91 @@ const Info: React.FC = () => {
   }
 
   return (
-    <div>
-      <Box>
-        <List aria-label="main mailbox folders">
-          {profile && profile.basicInfoData && profile.basicInfoData.email && (
-            <ListItem>
-              <ListItemIcon>
-                <MailIcon />
-              </ListItemIcon>
-              <ListItemText
-                disableTypography
-                primary={(
-                  <a href={`mailto:${profile.basicInfoData.email}`}>{profile.basicInfoData.email}</a>
-                )}
-              />
-            </ListItem>
-          )}
-          {profile && profile.basicInfoData && profile.basicInfoData.phone1 && (
-            <ListItem>
-              <ListItemIcon>
-                <PhoneIphoneIcon />
-              </ListItemIcon>
-              <ListItemText
-                disableTypography
-                primary={(
-                  <a href={`tel:${profile.basicInfoData.phone1}`}>{profile.basicInfoData.phone1}</a>
-                )}
-              />
-            </ListItem>
-          )}
-          {profile && profile.basicInfoData && profile.basicInfoData.phone2 && (
-            <ListItem>
-              <ListItemIcon>
-                <PhoneIphoneIcon />
-              </ListItemIcon>
-              <ListItemText
-                disableTypography
-                primary={(
-                  <a href={`tel:${profile.basicInfoData.phone2}`}>{profile.basicInfoData.phone2}</a>
-                )}
-              />
-            </ListItem>
-          )}
-          {address && location && (
-            <>
-              <ListItem>
-                <ListItemIcon>
-                  <LocationOnIcon />
-                </ListItemIcon>
-                <ListItemText
-                  disableTypography
-                  primary={(
-                    <a href={`geo:${location && location.lat ? location.lat : 0},${location && location.lng ? location.lng : 0}?q=${address}`}>
-                      {address}
-                    </a>
-                  )}
-                />
-              </ListItem>
-              {location && location.lat && location.lng && (
-                <ListItem>
-                  <GoogleMapDisplay lat={location.lat} lng={location.lng} />
-                </ListItem>
+    <Box
+      className={classes.infoContainer}
+      width="100%"
+    > 
+      <List>
+        {profile && profile.basicInfoData && profile.basicInfoData.email && (
+          <ListItem>
+            <ListItemIcon>
+              <MailIcon />
+            </ListItemIcon>
+            <ListItemText
+              disableTypography
+              primary={(
+                <a href={`mailto:${profile.basicInfoData.email}`}>{profile.basicInfoData.email}</a>
               )}
-            </>
-          )}
-          {address && !location && (
-            <>
-              <ListItem>
-                <ListItemIcon>
-                  <LocationOnIcon />
-                </ListItemIcon>
-                <ListItemText
-                  disableTypography
-                  primary={(
-                    <p>
-                      {address}
-                    </p>
-                  )}
-                />
+            />
+          </ListItem>
+        )}
+        {profile && profile.basicInfoData && profile.basicInfoData.phone1 && (
+          <ListItem>
+            <ListItemIcon>
+              <PhoneIphoneIcon />
+            </ListItemIcon>
+            <ListItemText
+              disableTypography
+              primary={(
+                <a href={`tel:${profile.basicInfoData.phone1}`}>{profile.basicInfoData.phone1}</a>
+              )}
+            />
+          </ListItem>
+        )}
+        {profile && profile.basicInfoData && profile.basicInfoData.phone2 && (
+          <ListItem>
+            <ListItemIcon>
+              <PhoneIphoneIcon />
+            </ListItemIcon>
+            <ListItemText
+              disableTypography
+              primary={(
+                <a href={`tel:${profile.basicInfoData.phone2}`}>{profile.basicInfoData.phone2}</a>
+              )}
+            />
+          </ListItem>
+        )}
+        {address && location && (
+          <>
+            <ListItem>
+              <ListItemIcon>
+                <LocationOnIcon />
+              </ListItemIcon>
+              <ListItemText
+                disableTypography
+                primary={(
+                  <a href={`geo:${location && location.lat ? location.lat : 0},${location && location.lng ? location.lng : 0}?q=${address}`}>
+                    {address}
+                  </a>
+                )}
+              />
+            </ListItem>
+            {location && location.lat && location.lng && (
+              <ListItem style={{ paddingLeft: 0, paddingRight: 0 }}>
+                <GoogleMapDisplay lat={location.lat} lng={location.lng} />
               </ListItem>
-            </>
-          )}
-        </List>
-      </Box>
-    </div>
+            )}
+          </>
+        )}
+        {address && !location && (
+          <>
+            <ListItem>
+              <ListItemIcon>
+                <LocationOnIcon />
+              </ListItemIcon>
+              <ListItemText
+                disableTypography
+                primary={(
+                  <p>
+                    {address}
+                  </p>
+                )}
+              />
+            </ListItem>
+          </>
+        )}
+      </List>
+    </Box>
   );
 };
 

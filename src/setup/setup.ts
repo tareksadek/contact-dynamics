@@ -105,10 +105,10 @@ export const defaultMenu = [
     ],
   },
   {
-    title: 'analytics',
+    title: 'reports',
     links: [
+      { linkfor: 'analytics', path: '/efficiency' },
       { linkfor: 'impact', path: '/impact' },
-      { linkfor: 'efficiency', path: '/efficiency' },
     ],
   },
   {
@@ -155,10 +155,10 @@ export const teamMasterMenu = [
     ],
   },
   {
-    title: 'analytics',
+    title: 'reports',
     links: [
+      { linkfor: 'analytics', path: '/efficiency' },
       { linkfor: 'impact', path: '/impact' },
-      { linkfor: 'efficiency', path: '/efficiency' },
     ],
   },
   {
@@ -193,10 +193,10 @@ export const teamMemberMenu = [
     ],
   },
   {
-    title: 'analytics',
+    title: 'reports',
     links: [
+      { linkfor: 'analytics', path: '/efficiency' },
       { linkfor: 'impact', path: '/impact' },
-      { linkfor: 'efficiency', path: '/efficiency' },
     ],
   },
   {
@@ -273,3 +273,11 @@ export const CONNECTIONS_HUBSPOT_CSV_HEADER = [
   'Email Address',
   'Phone Number',
 ]
+
+export const formOptions = [
+  { value: 'default', display: 'Default', img: 'defaultForm.svg', description: '' },
+  { value: 'google', display: 'Google Form', img: 'googleForms.svg', description: 'To get the embed code from Google Form, go to...' },
+  { value: 'microsoft', display: 'Microsoft Form', img: 'microsoftForms.svg', description: 'To get the embed code from Microsoft Form, go to...' },
+  { value: 'typeform', display: 'Type Form', img: 'typeForm.svg', description: 'To get the embed code from Typeform Form, go to...' },
+  { value: 'jotform', display: 'Jot Form', img: 'jotForm.svg', description: 'To get the embed code from Jotform Form, go to...' },
+];

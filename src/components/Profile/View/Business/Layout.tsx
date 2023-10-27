@@ -1,36 +1,46 @@
-import React from 'react';
 import Header from './Header';
+import { Box } from '@mui/material';
 import About from '../About';
 import ActionButtons from '../ActionButtons';
-import Links from '../Links';
+import CustomLinks from '../CustomLinks';
 import Video from '../Video';
 import Info from '../Info';
 
 const Layout: React.FC<{ profile: any }> = ({ profile }) => {
   return (
-    <div>
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      flexDirection="column"
+    >
       <Header />
 
-      <About />
+      <Box mb={2} width="100%">
+        <ActionButtons
+          buttonStyles={{
+            layout: 'divided',
+            buttonStyle: 'rounded'
+          }}
+        />
+      </Box>
 
-      <ActionButtons
-        buttonStyles={{
-          layout: 'divided',
-          buttonStyle: 'rounded'
-        }}
-      />
+      <Box mt={2} mb={2} width="100%">
+        <CustomLinks />
+      </Box>
 
-      <Links
-        linksStyles={{
-          socialLinksStyle: 'rounded',
-          customLinksFirst: false
-        }}
-      />
+      <Box mt={2} mb={2} width="100%">
+        <About />
+      </Box>
 
-      <Video />
+      <Box mt={2} mb={2} width="100%">
+        <Video />
+      </Box>
 
-      <Info />
-    </div>
+      <Box mt={2} width="100%">
+        <Info />
+      </Box>
+    </Box>
   );
 };
 

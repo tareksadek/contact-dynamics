@@ -1,12 +1,15 @@
 import React from 'react';
-import { Avatar } from '@mui/material';
+import { Avatar, Box, Typography } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store/reducers';
 import { placeHolderProfileImage } from '../../../../setup/setup';
+import { defaultHeaderStyles } from '../styles';
 
 const Header: React.FC = () => {
+  const classes = defaultHeaderStyles()
   const setup = useSelector((state: RootState) => state.setup.setup);
   const profile = useSelector((state: RootState) => state.profile.profile);
+  const themeColorCode = profile?.themeSettings.selectedColor.code
 
   let coverImage, organization;
 
@@ -23,27 +26,52 @@ const Header: React.FC = () => {
   }
 
   return (
-    <div>
-      <div style={{ maxWidth: '550px' }}>
-        <div>
+    <Box width="100%" maxWidth={550} className={classes.headerContainer}>
+      <Box className={classes.imagesContainer} mb={8}>
+        <Box
+          className={classes.coverImageContainer}
+          maxWidth={550}
+          minHeight={coverImage ? 'initial' : 200}
+          width="100%"
+          style={{
+            backgroundColor: themeColorCode,
+          }}
+        >
           {coverImage && (
-            <img src={coverImage} alt="Cover" style={{ width: '550px', height: '275px' }} />
+            <img src={coverImage} alt="Cover" />
           )}
-          <Avatar src={profile && profile.profileImageData.url ? profile.profileImageData.url : placeHolderProfileImage} alt="Profile" style={{ width: '120px', height: '120px' }} />
-        </div>
-        <div>
-          <h2>
+        </Box>
+        <Box
+          className={classes.profileImageContainer}
+          width={106}
+          height={106}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Avatar
+            src={profile && profile.profileImageData.url ? profile.profileImageData.url : placeHolderProfileImage}
+            alt="Profile"
+            sx={{ width: 100, height: 100 }}
+          />
+        </Box>
+      </Box>
+      <Box className={classes.dataContainer} mb={2}>
+        <Box>
+          <Typography variant="h3" align="center">
             {profile && profile.basicInfoData && profile.basicInfoData.firstName ? profile.basicInfoData.firstName : ''}
             {profile && profile.basicInfoData && profile.basicInfoData.lastName ? ` ${profile.basicInfoData.lastName}` : ''}
-          </h2>
-          <p>
+          </Typography>
+        </Box>
+        <Box>
+          <Typography variant="body1" align="center">
             {organization || ''}
             {profile && profile.basicInfoData && profile.basicInfoData.position && organization ? ' - ' : ''}
             {profile && profile.basicInfoData && profile.basicInfoData.position ? profile.basicInfoData.position : ''}
-          </p>
-        </div>
-      </div>
-    </div>
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

@@ -8,7 +8,7 @@ const Analytics: React.FC = () => {
   const profile = useSelector((state: RootState) => state.profile.profile);
 
   return (
-    <Box>
+    <Box p={2}>
       <Report
         sections={{
           efficiency: true,

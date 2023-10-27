@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Button } from '@mui/material';
+import { Button, Box } from '@mui/material';
 import AddIcCallIcon from '@mui/icons-material/AddIcCall';
 import { RootState, AppDispatch } from '../../../store/reducers';
 import { createVCF } from '../../../utilities/utils';
@@ -11,6 +11,7 @@ import { setNotification } from '../../../store/actions/notificationCenter';
 import { createContact } from '../../../API/contact';
 import { incrementAddedToContacts } from '../../../API/profile';
 import { openModal, closeMenu } from '../../../store/actions/modal';
+import { actionButtonsStyles } from './styles';
 
 interface ActionButtonsProps {
   buttonStyles: {
@@ -20,11 +21,16 @@ interface ActionButtonsProps {
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({ buttonStyles }) => {
+  const classes = actionButtonsStyles()
   const user = useSelector((state: RootState) => state.user.user);
   const profile = useSelector((state: RootState) => state.profile.profile);
   const isLoggedIn = useSelector((state: RootState) => state.authUser.isLoggedIn);
   const authId = useSelector((state: RootState) => state.authUser.userId); 
   const isAccountOwner = isLoggedIn && (authId === user?.id)
+  const themeColorName = profile?.themeSettings.selectedColor.name
+  const themeColorCode = profile?.themeSettings.selectedColor.code
+  const backgroundColor = themeColorName !== 'grey' && themeColorCode ? themeColorCode : null;
+
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -71,35 +77,41 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ buttonStyles }) => {
   };
 
   return (
-    <div>
+    <Box width="100%" pl={1} pr={1}>
       {buttonStyles.layout === 'divided' && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', borderRadius: '5px' }}>
+        <Box className={classes.actionButtonsContainer} display='flex' justifyContent='space-between' gap={2}>
           <Button
             variant="contained"
             onClick={() => dispatch(openModal('connect'))}
+            className={classes.actionButton}
+            {...(backgroundColor ? { style: { backgroundColor } } : {})}
           >
             Connect
           </Button>
           <Button
             variant="contained"
             onClick={downloadVCard}
+            className={classes.actionButton}
+            {...(backgroundColor ? { style: { backgroundColor } } : {})}
           >
-            Add to contact
+            Add to contacts
           </Button>
-        </div>
+        </Box>
       )}
       {buttonStyles.layout === 'icon' && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', borderRadius: '5px' }}>
+        <Box className={classes.actionButtonsContainer} display='flex' justifyContent='space-between'>
           <Button
             variant="contained"
             onClick={() => dispatch(openModal('connect'))}
+            className={classes.actionButton}
+            {...(backgroundColor ? { style: { backgroundColor } } : {})}
           >
             Connect
           </Button>
-          <Button variant="contained">
+          <Button variant="contained" className={classes.actionButton} {...(backgroundColor ? { style: { backgroundColor } } : {})}>
             <AddIcCallIcon />
           </Button>
-        </div>
+        </Box>
       )}
       <ContactModal
         open={isContactModalOpen}
@@ -107,7 +119,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ buttonStyles }) => {
         onSubmit={handleModalSubmit}
         loadingData={false}
       />
-    </div>
+    </Box>
   );
 };
 

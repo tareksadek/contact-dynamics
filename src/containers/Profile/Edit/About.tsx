@@ -5,7 +5,7 @@ import React, {
   useContext,
 } from 'react';
 import _ from 'lodash';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { RootState, AppDispatch } from '../../../store/reducers';
@@ -14,6 +14,7 @@ import { AboutFormDataTypes } from '../../../types/profile';
 import { useRegisterSubmit, SubmitContext } from '../../../contexts/SubmitContext';
 import { updateAboutInfoData } from '../../../store/actions/profile';
 import { layoutStyles } from '../../../theme/layout';
+import SaveButton from '../../../Layout/SaveButton';
 
 const About: React.FC = () => {
   const layoutClasses = layoutStyles()
@@ -35,10 +36,7 @@ const About: React.FC = () => {
     },
     mode: 'onBlur',
   });
-  const watchedValues = watch();
-
-  console.log(profile);
-  
+  const watchedValues = watch();  
 
   useEffect(() => {
     if (profile) {
@@ -77,7 +75,7 @@ const About: React.FC = () => {
   }, [watchedValues, setFormChanged, profile]);
 
   return (
-    <Box>
+    <Box p={2}>
       <form onSubmit={handleSubmit(handleAboutSubmit)}>
         <AboutForm
           formStatedata={profile ? profile?.aboutData : null}
@@ -90,22 +88,30 @@ const About: React.FC = () => {
           currentUser={user}
           currentVideo={currentVideo}
         />
-        <Box
-          className={layoutClasses.stickyBottomBox}
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            disabled={!formValid || !formChanged}
+        {/* {formChanged && ( */}
+          <Box
+            className={layoutClasses.stickyBottomBox}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
           >
-            Save
-          </Button>
-        </Box>
+            {/* <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              disabled={!formValid || !formChanged}
+            >
+              Save
+            </Button> */}
+            <SaveButton
+              // onClick={handleThemeSubmit}
+              type="submit"
+              text = "Save"
+              disabled={!formValid || !formChanged}
+            />
+          </Box>
+        {/* )} */}
       </form> 
     </Box>
   );

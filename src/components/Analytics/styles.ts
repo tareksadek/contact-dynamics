@@ -34,32 +34,52 @@ export const analyticsStyles = makeStyles((theme: Theme) => ({
       },
     },
   },
-
-  avatar: {},
-  teamsChip: {},
-  noHeaderGrid: {},
-  gridContainer: {
-    paddingTop: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-    paddingRight: theme.spacing(1),
-    '&$noHeaderGrid': {
-      '& .MuiDataGrid-columnHeaders': {
-        display: 'none',
+  linksList: {},
+  linkClicksContainer: {},
+  linkClicks: {},
+  link: {},
+  linksContainer: {
+    '& $linksList': {
+      '& $linkClicksContainer': {
+        '& $linkClicks': {
+          fontSize: '1.5rem',
+          color: theme.palette.background.blue,
+          fontWeight: 600,
+          '& span': {
+            color: theme.palette.background.reverse,
+            fontSize: '0.75rem',
+            fontWeight: 400,
+            marginLeft: theme.spacing(0.5),
+          },
+        },
+        '& $link': {
+          color: theme.palette.background.secondaryText,
+          position: 'relative',
+          top: -4,
+          '& .MuiTypography-body1': {
+            color: theme.palette.background.secondaryText,
+          },
+        },
       },
     },
-    '& $fullName': {
-      textTransform: 'capitalize',
-    },
-    '& $avatar': {
-      backgroundColor: theme.palette.background.avatar,
-      color: theme.palette.background.reverse,
-      fontSize: '0.8rem',
-      textTransform: 'capitalize',
-    },
-    '& $teamsChip': {
-      backgroundColor: theme.palette.background.green,
-      color: '#fff',
-    },
   },
+  totalVisits: {},
+  lineChartContainer: {},
+  visitsContainer: {
+    '& $totalVisits': {
+      '& .MuiTypography-body1': {
+        '&:first-child': {
+          fontSize: '1.5rem',
+          color: theme.palette.background.blue,
+          fontWeight: 600,
+        },
+        '&:last-child': {
+          color: theme.palette.background.secondaryText,
+        },
+      },
+    },
+    '& $lineChartContainer': {
+      marginLeft: -16
+    }
+  }
 }));

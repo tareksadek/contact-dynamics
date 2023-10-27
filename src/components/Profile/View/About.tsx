@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { Box, Typography } from '@mui/material';
 import { RootState } from '../../../store/reducers';
 
 const About: React.FC = () => {
@@ -16,15 +17,11 @@ const About: React.FC = () => {
 
   if (aboutData) {
     return (
-      <div>
-        <div>
-          <div>
-            <p>
-              {aboutData}
-            </p>
-          </div>
-        </div>
-      </div>
+      <Box pl={1} pr={1}>
+        <Typography variant="body1" align="center" style={{ fontSize: '0.75rem', lineHeight: '1.4rem' }}>
+          {aboutData}
+        </Typography>
+      </Box>
     );
   }
   return null

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, TextField, CircularProgress } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { ContactType } from '../../types/contact';
+import SaveButton from '../../Layout/SaveButton';
 
 interface ContactFormProps {
   isEdit?: boolean;
@@ -175,7 +176,7 @@ const AddContactForm: React.FC<ContactFormProps> = ({
         )}
       />
 
-      <Button
+      {/* <Button
         type="submit"
         variant="contained"
         color="primary"
@@ -183,7 +184,12 @@ const AddContactForm: React.FC<ContactFormProps> = ({
         fullWidth
       >
         {isEdit ? 'Update' : isSave ? 'Save' : 'Send'}
-      </Button>
+      </Button> */}
+      <SaveButton
+        type="submit"
+        text={isEdit ? 'Update' : isSave ? 'Save' : 'Send'}
+        disabled={!isValid || (isEdit && !formChanged)}
+      />
     </form>
   );
 };

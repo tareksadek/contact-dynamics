@@ -2,10 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/reducers';
 import QRCodeStyling from "qr-code-styling";
-import { Button } from '@mui/material';
+import { Button, Box } from '@mui/material';
+import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import { appDomain } from '../../setup/setup';
+import { qrStyles } from './style';
 
 const QrCode: React.FC = () => {
+  const classes = qrStyles()
   const user = useSelector((state: RootState) => state.user.user);
   const qrCodeRef = useRef(null);
   const qrCodeInstanceRef = useRef<any>(null);
@@ -42,11 +45,28 @@ const QrCode: React.FC = () => {
   };
 
   return (
-    <div>
-      <div ref={qrCodeRef}></div>
-      <Button variant="contained" color="primary" onClick={downloadAsSVG}>Download as SVG</Button>
-      <Button variant="contained" color="secondary" onClick={downloadAsPNG} style={{ marginLeft: '10px' }}>Download as PNG</Button>
-    </div>
+    <Box
+      p={2}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      flexDirection="column"
+    >
+      <Box className={classes.qrContainer}>
+        <div ref={qrCodeRef}></div>
+      </Box>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        gap={2}
+        mt={2}
+        minWidth={200}
+      >
+        <Button variant="contained" color="primary" onClick={downloadAsSVG} startIcon={<DownloadForOfflineIcon />} fullWidth>SVG</Button>
+        <Button variant="contained" color="secondary" onClick={downloadAsPNG} startIcon={<DownloadForOfflineIcon />} fullWidth>PNG</Button>
+      </Box>
+    </Box>
   );
 };
 

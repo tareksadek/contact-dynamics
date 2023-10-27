@@ -1,9 +1,6 @@
 import React from 'react';
 import {
   Typography,
-  List,
-  ListItem,
-  Button,
   Box,
   Accordion,
   AccordionDetails,
@@ -30,7 +27,6 @@ const EfficiencyReport: React.FC<EfficiencyProps> = ({ contacts, visits, addedTo
 
   const displayEfficiency = Number.isInteger(efficiencyPercentage) ? `${Math.round(efficiencyPercentage)}%` : `${efficiencyPercentage.toFixed(1)}%`;
 
-
   return (
     <Box>
       <Box pb={2} className={classes.efficiencyBoxContainer}>
@@ -40,7 +36,7 @@ const EfficiencyReport: React.FC<EfficiencyProps> = ({ contacts, visits, addedTo
             aria-controls="panel1bh-content"
             id="panel1bh-header"
           >
-            <Typography variant="body1" align="left">Digital Card</Typography>
+            <Typography variant="body1" align="left">Card Efficiency</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Box p={2}>
@@ -63,7 +59,7 @@ const EfficiencyReport: React.FC<EfficiencyProps> = ({ contacts, visits, addedTo
                       <Cell key="rest" fill={theme.palette.background.grey} />
                     </Pie>
                   </PieChart>
-                  <Typography variant="body1"className={classes.efficiencyPercentage}>{displayEfficiency}</Typography>
+                  <Typography variant="body1" className={classes.efficiencyPercentage}>{displayEfficiency}</Typography>
                 </Box>
               )}
             </Box>

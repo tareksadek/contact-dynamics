@@ -1,5 +1,5 @@
 import { firestore, storage } from './firebaseConfig';
-import { doc, setDoc, updateDoc, getDoc, collection, where, getDocs, query, addDoc, arrayUnion, deleteDoc, increment } from '@firebase/firestore';
+import { doc, setDoc, updateDoc, getDoc, collection, where, getDocs, query, addDoc, arrayUnion, deleteDoc, increment, onSnapshot } from '@firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from '@firebase/storage';
 import isEqual from 'lodash/isEqual';
 import { ProfileDataType, BasicInfoFormDataTypes, AboutFormDataTypes, ThemeSettingsType, ColorType, CreateProfileResponseType, ContactFormType } from '../types/profile';
@@ -161,108 +161,373 @@ export const createProfile = async (userId: string, profileData: ProfileDataType
   }
 };
 
-export const fetchProfileById = async (userId: string, profileId: string) => {
-  try {
-    // Get reference to the profile in the subcollection
+// export const fetchProfileById = async (userId: string, profileId: string) => {
+//   try {
+//     // Get reference to the profile in the subcollection
+//     const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
+//     const profileSnapshot = await getDoc(profileRef);
+
+//     if (!profileSnapshot.exists()) {
+//       return { success: false, error: 'Profile not found.' };
+//     }
+
+//     let profileData: any = profileSnapshot.data();
+
+//     // 1. Fetch the links subcollection and reconstruct it
+//     const linksCollectionRef = collection(profileRef, 'links');
+//     const linksSnapshot = await getDocs(linksCollectionRef);
+//     let socialLinks: any[] = [];
+//     let customLinks: any[] = [];
+
+//     linksSnapshot.docs.forEach(doc => {
+//       const linkData = doc.data();
+//       linkData.id = doc.id;
+//       if (linkData.isSocial) {
+//         socialLinks.push(linkData);
+//       } else if (linkData.isCustom) {
+//         customLinks.push(linkData);
+//       }
+//     });
+
+//     // Sort the socialLinks and customLinks arrays based on the position attribute
+//     socialLinks = socialLinks.sort((a, b) => a.position - b.position);
+//     customLinks = customLinks.sort((a, b) => a.position - b.position);
+
+//     profileData.links = { social: socialLinks, custom: customLinks };
+
+//     // 2. Fetch the profileImage subcollection and merge with profileImageData
+//     const profileImageCollectionRef = collection(profileRef, 'profileImage');
+//     const profileImageSnapshot = await getDocs(profileImageCollectionRef);
+
+//     // Assuming there's only one doc under profileImage subcollection
+//     if (!profileImageSnapshot.empty) {
+//       const profileImageData = profileImageSnapshot.docs[0].data();
+//       if (profileImageData.base64) {
+//         profileData.profileImageData.base64 = profileImageData.base64;
+//       }
+//     }
+
+//     return { success: true, data: profileData };
+//   } catch (error) {
+//     console.error("Error fetching profile:", error);
+//     return { success: false, error: (error as Error).message };
+//   }
+// };
+
+// export const updateProfileBasicInfo = async (userId: string, profileId: string, basicInfoData: BasicInfoFormDataTypes) => {
+//   try {
+//     const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
+//     await updateDoc(profileRef, { basicInfoData });
+//     return { success: true };
+//   } catch (error) {
+//     console.error("Error updating basic info:", error);
+//     return { success: false, error: (error as Error).message };
+//   }
+// };
+
+export const fetchProfileById = (userId: string, profileId: string) => {
+  return new Promise<{ success: boolean, data?: any, error?: string }>((mainResolve, mainReject) => {
     const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
-    const profileSnapshot = await getDoc(profileRef);
 
-    if (!profileSnapshot.exists()) {
-      return { success: false, error: 'Profile not found.' };
-    }
+    const unsubscribeProfile = onSnapshot(profileRef, profileSnapshot => {
+      if (profileSnapshot.exists()) {
+        let profileData: any = profileSnapshot.data();
 
-    let profileData: any = profileSnapshot.data();
+        // Handle links subcollection
+        const linksCollectionRef = collection(profileRef, 'links');
 
-    // 1. Fetch the links subcollection and reconstruct it
-    const linksCollectionRef = collection(profileRef, 'links');
-    const linksSnapshot = await getDocs(linksCollectionRef);
-    let socialLinks: any[] = [];
-    let customLinks: any[] = [];
+        const unsubscribeLinks = onSnapshot(linksCollectionRef, linksSnapshot => {
+          let socialLinks: any[] = [];
+          let customLinks: any[] = [];
 
-    linksSnapshot.docs.forEach(doc => {
-      const linkData = doc.data();
-      linkData.id = doc.id;
-      if (linkData.isSocial) {
-        socialLinks.push(linkData);
-      } else if (linkData.isCustom) {
-        customLinks.push(linkData);
+          linksSnapshot.docs.forEach(doc => {
+            const linkData = doc.data();
+            linkData.id = doc.id;
+            if (linkData.isSocial) {
+              socialLinks.push(linkData);
+            } else if (linkData.isCustom) {
+              customLinks.push(linkData);
+            }
+          });
+
+          // Sort the links
+          socialLinks.sort((a, b) => a.position - b.position);
+          customLinks.sort((a, b) => a.position - b.position);
+          profileData.links = { social: socialLinks, custom: customLinks };
+
+          // Handle profileImage subcollection
+          const profileImageCollectionRef = collection(profileRef, 'profileImage');
+
+          const unsubscribeProfileImage = onSnapshot(profileImageCollectionRef, profileImageSnapshot => {
+            if (!profileImageSnapshot.empty) {
+              const profileImageData = profileImageSnapshot.docs[0].data();
+              if (profileImageData.base64) {
+                profileData.profileImageData.base64 = profileImageData.base64;
+              }
+            }
+
+            mainResolve({ success: true, data: profileData });
+            console.log(profileData);
+            
+            // Cleanup listeners
+            unsubscribeProfileImage();
+          }, error => {
+            console.error("Error fetching profile image:", error);
+            mainReject({ success: false, error: error.message });
+          });
+
+        }, error => {
+          console.error("Error fetching links:", error);
+          mainReject({ success: false, error: error.message });
+        });
+
+      } else {
+        mainReject({ success: false, error: 'Profile not found.' });
       }
+
+      // Cleanup the main profile listener.
+      unsubscribeProfile();
+
+    }, error => {
+      console.error("Error fetching profile:", error);
+      mainReject({ success: false, error: error.message });
     });
-
-    // Sort the socialLinks and customLinks arrays based on the position attribute
-    socialLinks = socialLinks.sort((a, b) => a.position - b.position);
-    customLinks = customLinks.sort((a, b) => a.position - b.position);
-
-    profileData.links = { social: socialLinks, custom: customLinks };
-
-    // 2. Fetch the profileImage subcollection and merge with profileImageData
-    const profileImageCollectionRef = collection(profileRef, 'profileImage');
-    const profileImageSnapshot = await getDocs(profileImageCollectionRef);
-
-    // Assuming there's only one doc under profileImage subcollection
-    if (!profileImageSnapshot.empty) {
-      const profileImageData = profileImageSnapshot.docs[0].data();
-      if (profileImageData.base64) {
-        profileData.profileImageData.base64 = profileImageData.base64;
-      }
-    }
-
-    return { success: true, data: profileData };
-  } catch (error) {
-    console.error("Error fetching profile:", error);
-    return { success: false, error: (error as Error).message };
-  }
+  });
 };
 
-export const updateProfileBasicInfo = async (userId: string, profileId: string, basicInfoData: BasicInfoFormDataTypes) => {
-  try {
-    const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
-    await updateDoc(profileRef, { basicInfoData });
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating basic info:", error);
-    return { success: false, error: (error as Error).message };
-  }
+export const updateProfileBasicInfo = (userId: string, profileId: string, basicInfoData: BasicInfoFormDataTypes) => {
+  return new Promise<{ success: boolean, error?: string }>((resolve, reject) => {
+      const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
+
+      const unsubscribe = onSnapshot(profileRef, (doc) => {
+          if (doc.metadata.hasPendingWrites) {
+              console.log("Data is being written...");
+          }
+
+          if (doc.metadata.fromCache) {
+              console.log("Data came from cache.");
+              unsubscribe(); 
+              resolve({ success: true });
+          } else {
+              console.log("Data came from the server.");
+          }
+
+          if (!doc.metadata.hasPendingWrites && !doc.metadata.fromCache) {
+              // Assuming that once data is not from cache and has no pending writes,
+              // it's successfully updated on the server.
+              unsubscribe(); // Important: Stop listening to changes.
+              resolve({ success: true });
+          }
+      }, (error) => {
+          // This is called if there's an error with the snapshot listener
+          console.error("Snapshot error:", error);
+          unsubscribe();
+          reject({ success: false, error: error.message });
+      });
+
+      // Attempt to update the document
+      updateDoc(profileRef, { basicInfoData }).catch(error => {
+          console.error("Error updating basic info:", error);
+          unsubscribe();  // Important: Stop listening to changes if there's an error.
+          reject({ success: false, error: error.message });
+      });
+  });
 };
+
+// export const updateContactForm = async (userId: string, profileId: string, contactFormData: ContactFormType) => {
+//   try {
+//     const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
+//     await updateDoc(profileRef, { contactFormData });
+//     return { success: true };
+//   } catch (error) {
+//     console.error("Error updating contact form:", error);
+//     return { success: false, error: (error as Error).message };
+//   }
+// };
+
+// export const updateAboutInfo = async (userId: string, profileId: string, aboutData: AboutFormDataTypes) => {
+//   try {
+//     console.log('a');
+    
+//     const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
+//     console.log('b');
+    
+//     await updateDoc(profileRef, { aboutData });
+//     console.log('c');
+    
+//     return { success: true };
+//   } catch (error) {
+//     console.error("Error updating about info:", error);
+//     return { success: false, error: (error as Error).message };
+//   }
+// };
+
+// export const updateAboutInfo = (userId: string, profileId: string, aboutData: AboutFormDataTypes) => {
+//   return new Promise<{ success: boolean, error?: string }>((resolve, reject) => {
+//       const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
+
+//       const unsubscribe = onSnapshot(profileRef, (doc) => {
+//           if (doc.metadata.hasPendingWrites) {
+//               console.log("Data is being written...");
+//           }
+
+//           if (doc.metadata.fromCache) {
+//               console.log("Data came from cache.");
+//               unsubscribe(); // Stop listening to changes.
+//               resolve({ success: true });
+//           } else {
+//               console.log("Data came from the server.");
+//           }
+
+//           if (!doc.metadata.hasPendingWrites && !doc.metadata.fromCache) {
+//               // Assuming that once data is not from cache and has no pending writes,
+//               // it's successfully updated on the server.
+//               unsubscribe(); // Important: Stop listening to changes.
+//               resolve({ success: true });
+//           }
+//       }, (error) => {
+//           // This is called if there's an error with the snapshot listener
+//           console.error("Snapshot error:", error);
+//           unsubscribe();
+//           reject({ success: false, error: error.message });
+//       });
+//       console.log('bbbbbb');
+      
+//       // Attempt to update the document
+//       updateDoc(profileRef, { aboutData }).catch(error => {
+//           console.error("Error updating about info:", error);
+//           unsubscribe();  // Important: Stop listening to changes if there's an error.
+//           reject({ success: false, error: error.message });
+//       });
+//       console.log('zzzzzzzzzzzz');
+      
+//   });
+// };
 
 export const updateContactForm = async (userId: string, profileId: string, contactFormData: ContactFormType) => {
-  try {
-    const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
-    await updateDoc(profileRef, { contactFormData });
-    return { success: true };
-  } catch (error) {
+  const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
+
+  // Start the write operation
+  updateDoc(profileRef, { contactFormData }).catch(error => {
     console.error("Error updating contact form:", error);
-    return { success: false, error: (error as Error).message };
-  }
+    // Handle the error or throw it for the outer function to catch
+  });
+
+  return new Promise<{ success: boolean, error?: string }>((resolve, reject) => {
+    const unsubscribe = onSnapshot(profileRef, (doc) => {
+      if (doc.metadata.hasPendingWrites) {
+        console.log("Data is being written...");
+      }
+
+      if (doc.metadata.fromCache) {
+        console.log("Data came from cache.");
+        unsubscribe(); // Stop listening to changes.
+        resolve({ success: true });
+      }
+
+      if (!doc.metadata.hasPendingWrites && !doc.metadata.fromCache) {
+        console.log("Data came from the server.");
+        unsubscribe(); // Stop listening to changes.
+        resolve({ success: true });
+      }
+    }, (error) => {
+      console.error("Snapshot error:", error);
+      unsubscribe();
+      reject({ success: false, error: error.message });
+    });
+  });
 };
 
 export const updateAboutInfo = async (userId: string, profileId: string, aboutData: AboutFormDataTypes) => {
-  try {
-    const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
-    await updateDoc(profileRef, { aboutData });
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating about info:", error);
-    return { success: false, error: (error as Error).message };
-  }
+  const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
+
+  // Start the write operation
+  updateDoc(profileRef, { aboutData }).catch(error => {
+      console.error("Error updating about info:", error);
+      // Handle the error or throw it for the outer function to catch
+  });
+
+  return new Promise<{ success: boolean, error?: string }>((resolve, reject) => {
+      const unsubscribe = onSnapshot(profileRef, (doc) => {
+          if (doc.metadata.hasPendingWrites) {
+              console.log("Data is being written...");
+          }
+
+          if (doc.metadata.fromCache) {
+              console.log("Data came from cache.");
+              unsubscribe(); // Stop listening to changes.
+              resolve({ success: true });
+          }
+
+          if (!doc.metadata.hasPendingWrites && !doc.metadata.fromCache) {
+              console.log("Data came from the server.");
+              unsubscribe(); // Stop listening to changes.
+              resolve({ success: true });
+          }
+      }, (error) => {
+          console.error("Snapshot error:", error);
+          unsubscribe();
+          reject({ success: false, error: error.message });
+      });
+  });
 };
 
-export const updateThemeSettings = async (userId: string, profileId: string, themeSettings: ThemeSettingsType, favoriteColors: ColorType[]) => {
-  try {
-    const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
-    await updateDoc(
-      profileRef,
-      {
-        themeSettings,
-        favoriteColors
-      }
-    );
-    return { success: true };
-  } catch (error) {
+// export const updateThemeSettings = async (userId: string, profileId: string, themeSettings: ThemeSettingsType, favoriteColors: ColorType[]) => {
+//   try {
+//     const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
+//     await updateDoc(
+//       profileRef,
+//       {
+//         themeSettings,
+//         favoriteColors
+//       }
+//     );
+//     return { success: true };
+//   } catch (error) {
+//     console.error("Error updating theme settings:", error);
+//     return { success: false, error: (error as Error).message };
+//   }
+// };
+
+export const updateThemeSettings = async (
+  userId: string, 
+  profileId: string, 
+  themeSettings: ThemeSettingsType, 
+  favoriteColors: ColorType[]
+) => {
+  const profileRef = doc(firestore, 'users', userId, 'profiles', profileId);
+
+  // Start the write operation
+  updateDoc(profileRef, { themeSettings, favoriteColors }).catch(error => {
     console.error("Error updating theme settings:", error);
-    return { success: false, error: (error as Error).message };
-  }
+    // Handle the error or throw it for the outer function to catch
+  });
+
+  return new Promise<{ success: boolean, error?: string }>((resolve, reject) => {
+    const unsubscribe = onSnapshot(profileRef, (doc) => {
+      if (doc.metadata.hasPendingWrites) {
+        console.log("Data is being written...");
+      }
+
+      if (doc.metadata.fromCache) {
+        console.log("Data came from cache.");
+        unsubscribe(); // Stop listening to changes.
+        resolve({ success: true });
+      }
+
+      if (!doc.metadata.hasPendingWrites && !doc.metadata.fromCache) {
+        console.log("Data came from the server.");
+        unsubscribe(); // Stop listening to changes.
+        resolve({ success: true });
+      }
+    }, (error) => {
+      console.error("Snapshot error:", error);
+      unsubscribe();
+      reject({ success: false, error: error.message });
+    });
+  });
 };
+
 
 export const updateCoverImage = async (
   userId: string,
@@ -333,6 +598,48 @@ export const updateProfileImage = async (
   }
 };
 
+// export const updateLinks = async (userId: string, profileId: string, newLinks: any) => {
+//   const linksCollectionRef = collection(doc(firestore, 'users', userId, 'profiles', profileId), 'links');
+
+//   // Fetch current links from Firestore
+//   const currentLinksSnapshot = await getDocs(linksCollectionRef);
+//   const currentLinks: any[] = [];
+//   currentLinksSnapshot.forEach(doc => {
+//     currentLinks.push({
+//       id: doc.id,
+//       ...doc.data()
+//     });
+//   });
+
+//   // Determine links to be added, updated, or deleted
+//   const newLinksFlat = [...newLinks.social, ...newLinks.custom];
+
+//   for (const link of newLinksFlat) {
+//     // If no id, it's a new link
+//     if (!link.id) {
+//       await addDoc(linksCollectionRef, link);
+//     } else {
+//       const currentLinkData = currentLinks.find(l => l.id === link.id);
+//       if (currentLinkData) {
+//         // Compare data and update if necessary
+//         if (!isEqual(currentLinkData, link)) {
+//           const linkRef = doc(linksCollectionRef, link.id);
+//           await updateDoc(linkRef, link);
+//         }
+//       }
+//     }
+//   }
+
+//   // Check for links to delete
+//   for (const currentLink of currentLinks) {
+//     if (!newLinksFlat.some(link => link.id === currentLink.id)) {
+//       await deleteDoc(doc(linksCollectionRef, currentLink.id));
+//     }
+//   }
+
+//   return { success: true };
+// };
+
 export const updateLinks = async (userId: string, profileId: string, newLinks: any) => {
   const linksCollectionRef = collection(doc(firestore, 'users', userId, 'profiles', profileId), 'links');
 
@@ -346,20 +653,22 @@ export const updateLinks = async (userId: string, profileId: string, newLinks: a
     });
   });
 
+  const tasks: Promise<any>[] = [];
+
   // Determine links to be added, updated, or deleted
   const newLinksFlat = [...newLinks.social, ...newLinks.custom];
 
   for (const link of newLinksFlat) {
     // If no id, it's a new link
     if (!link.id) {
-      await addDoc(linksCollectionRef, link);
+      tasks.push(addDoc(linksCollectionRef, link));
     } else {
       const currentLinkData = currentLinks.find(l => l.id === link.id);
       if (currentLinkData) {
         // Compare data and update if necessary
         if (!isEqual(currentLinkData, link)) {
           const linkRef = doc(linksCollectionRef, link.id);
-          await updateDoc(linkRef, link);
+          tasks.push(updateDoc(linkRef, link));
         }
       }
     }
@@ -368,12 +677,19 @@ export const updateLinks = async (userId: string, profileId: string, newLinks: a
   // Check for links to delete
   for (const currentLink of currentLinks) {
     if (!newLinksFlat.some(link => link.id === currentLink.id)) {
-      await deleteDoc(doc(linksCollectionRef, currentLink.id));
+      tasks.push(deleteDoc(doc(linksCollectionRef, currentLink.id)));
     }
   }
 
+  // Wait for all tasks to complete
+  await Promise.all(tasks).catch(error => {
+    console.error("Error updating links:", error);
+    return { success: false, error: error.message };
+  });
+
   return { success: true };
 };
+
 
 export const logProfileVisit = async (userId: string, profileId: string) => {
   try {

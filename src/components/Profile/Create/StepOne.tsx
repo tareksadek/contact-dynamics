@@ -9,7 +9,7 @@ import { stepsStyles } from './styles';
 interface StepOneProps {
   formStatedata: BasicInfoFormDataTypes | null;
   location: {
-    lat: number, 
+    lat: number,
     lng: number
   } | null;
   setLocation: (location: { lat: number, lng: number } | null) => void;
@@ -44,7 +44,7 @@ const StepOne: React.FC<StepOneProps> = ({
     },
     mode: 'onBlur',
   });
-  
+
 
   return (
     <form
@@ -68,25 +68,48 @@ const StepOne: React.FC<StepOneProps> = ({
         currentUser={currentUser}
         defaultData={currentUser}
       />
-      {!isFirstStep && (
-        <Button onClick={onPrev}>Previous</Button>
-      )}
-      <Box
-        className={classes.stickyBox}
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Button
-          type="submit"
-          fullWidth={isFirstStep}
-          variant="contained"
-          color="primary"
-          disabled={!isValid}
+      {isFirstStep ? (
+        <Box
+          className={classes.stickyBox}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
         >
-          Next
-        </Button>
-      </Box>
+          <Button
+            type="submit"
+            fullWidth={isFirstStep}
+            variant="contained"
+            color="primary"
+            disabled={!isValid}
+          >
+            Next
+          </Button>
+        </Box>
+      ) : (
+        <Box
+          className={classes.stickyBox}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Button
+            onClick={onPrev}
+            variant="outlined"
+            color="primary"
+          >
+            Previous
+          </Button>
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+          >
+            Next
+          </Button>
+        </Box>
+      )}
+
     </form>
   );
 }

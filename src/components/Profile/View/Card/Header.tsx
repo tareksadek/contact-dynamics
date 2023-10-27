@@ -1,34 +1,97 @@
 import React from 'react';
-import { Avatar } from '@mui/material';
+import { Avatar, Box, Typography } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store/reducers';
 import { placeHolderProfileImage } from '../../../../setup/setup';
+import { cardHeaderStyles } from '../styles';
+import SocialLinks from '../SocialLinks';
 
 const Header: React.FC = () => {
+  const classes = cardHeaderStyles()
+  const setup = useSelector((state: RootState) => state.setup.setup);
   const profile = useSelector((state: RootState) => state.profile.profile);
+  const themeColorCode = profile?.themeSettings.selectedColor.code
+
+  let coverImage, organization;
+
+  if (setup && setup.coverImageData && setup.coverImageData.url) {
+    coverImage = setup.coverImageData.url;
+  } else if (profile && profile.coverImageData && profile.coverImageData.url) {
+    coverImage = profile.coverImageData.url;
+  }
+
+  if (setup && setup.basicInfoData && setup.basicInfoData.organization) {
+    organization = setup.basicInfoData.organization;
+  } else if (profile && profile.basicInfoData && profile.basicInfoData.organization) {
+    organization = profile.basicInfoData.organization;
+  }
 
   return (
-    <div>
-      <div style={{ maxWidth: '550px' }}>
-        <div>
-          {profile && profile.coverImageData.url && (
-            <img src={profile.coverImageData.url} alt="Cover" style={{ width: '550px', height: '275px' }} />
-          )}
-          <Avatar src={profile && profile.profileImageData.url ? profile.profileImageData.url : placeHolderProfileImage} alt="Profile" style={{ width: '120px', height: '120px' }} />
-        </div>
-        <div>
-          <h2>
-            {profile && profile.basicInfoData && profile.basicInfoData.firstName ? profile.basicInfoData.firstName : ''}
-            {profile && profile.basicInfoData && profile.basicInfoData.lastName ? ` ${profile.basicInfoData.lastName}` : ''}
-          </h2>
-          <p>
-            {profile && profile.basicInfoData && profile.basicInfoData.organization ? profile.basicInfoData.organization : ''}
-            &nbsp;-&nbsp; 
-            {profile && profile.basicInfoData && profile.basicInfoData.position ? profile.basicInfoData.position : ''}
-          </p>
-        </div>
-      </div>
-    </div>
+    <Box width="100%" maxWidth={550} className={classes.headerContainer}>
+      <Box className={classes.imagesContainer}>
+        <Box
+          className={classes.coverImageContainer}
+          maxWidth={550}
+          minHeight={coverImage ? 'initial' : 200}
+          width="100%"
+          style={{
+            // backgroundColor: coverImage ? 'transparent' : themeColorCode,
+            background: coverImage ? `url(${coverImage}) no-repeat center top` : themeColorCode
+          }}
+        >
+          {/* {coverImage && (
+            <img src={coverImage} alt="Cover" />
+          )} */}
+          <Box
+            className={classes.cardContainer}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            flexDirection="column"
+          >
+            <Box
+              className={classes.profileImageContainer}
+              width={106}
+              height={106}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Avatar
+                src={profile && profile.profileImageData.url ? profile.profileImageData.url : placeHolderProfileImage}
+                alt="Profile"
+                sx={{ width: 100, height: 100 }}
+              />
+            </Box>
+            <Box className={classes.dataContainer} mt={1}>
+              <Box>
+                <Typography variant="h3" align="center">
+                  {profile && profile.basicInfoData && profile.basicInfoData.firstName ? profile.basicInfoData.firstName : ''}
+                  {profile && profile.basicInfoData && profile.basicInfoData.lastName ? ` ${profile.basicInfoData.lastName}` : ''}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="body1" align="center">
+                  {organization || ''}
+                  {profile && profile.basicInfoData && profile.basicInfoData.position && organization ? ' - ' : ''}
+                  {profile && profile.basicInfoData && profile.basicInfoData.position ? profile.basicInfoData.position : ''}
+                </Typography>
+              </Box>
+            </Box>
+            <Box mt={1}>
+              <SocialLinks
+                linksStyles={{
+                  socialLinksStyle: 'rounded',
+                  align: 'center',
+                  size: 35
+                }}
+              />
+            </Box>
+          </Box>
+        </Box>
+        
+      </Box>
+    </Box>
   );
 };
 

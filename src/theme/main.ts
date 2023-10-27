@@ -24,6 +24,8 @@ declare module '@mui/material/styles' {
     grey: string;
     blue: string;
     secondaryText: string;
+    panel: string;
+    formOption: string;
   }
 }
 
@@ -155,21 +157,21 @@ const responsiveGlobalTheme = responsiveFontSizes(completeTheme);
 
 const LIGHT_COLOR_PALETTE = {
   default: '#FBFBFB',
-  reverse: '#22262F',
+  reverse: '#222630',
   lighter: '#ffffff',
   darker: '#CBD5E1',
   darkerPlus: '#8795A6',
   dark: '#64748B',
   blue: '#25a0ff',
   darkBlue: '#0080e3',
-  green: '#83D56F',
+  green: '#34A353',
   grey: '#e0e2e5',
   red: '#BD081C',
 }
 
 const lightTheme = createTheme(responsiveGlobalTheme, {
   palette: {
-    mode: 'light', // This will automatically set some of the internal MUI colors for light mode
+    mode: 'light',
     background: {
       default: LIGHT_COLOR_PALETTE.default,
       reverse: LIGHT_COLOR_PALETTE.reverse,
@@ -193,10 +195,9 @@ const lightTheme = createTheme(responsiveGlobalTheme, {
       blue: LIGHT_COLOR_PALETTE.blue,
       danger: LIGHT_COLOR_PALETTE.red,
       secondaryText: LIGHT_COLOR_PALETTE.dark,
+      panel: LIGHT_COLOR_PALETTE.lighter,
+      formOption: LIGHT_COLOR_PALETTE.grey,
     },
-    // primary: {
-    //   main: LIGHT_COLOR_PALETTE.reverse,
-    // },
   },
   components: {
     MuiTypography: {
@@ -550,23 +551,23 @@ const lightTheme = createTheme(responsiveGlobalTheme, {
 });
 
 const DARK_COLOR_PALETTE = {
-  default: '#22262F',
+  default: '#222630',
   reverse: '#FBFBFB',
   lighter: '#2A3141',
-  light: '#4c6077',
-  darker: '#191c25',
+  light: '#566d87',
+  darker: '#2A3043',
   darkerPlus: '#111111',
   dark: '#000000',
   blue: '#25a0ff',
   darkBlue: '#0080e3',
-  green: '#83D56F',
+  green: '#34A353',
   grey: '#BEC9D8',
   red: '#BD081C',
 }
 
 const darkTheme = createTheme(responsiveGlobalTheme, {
   palette: {
-    mode: 'dark', // This will automatically set some of the internal MUI colors for light mode
+    mode: 'dark',
     background: {
       default: DARK_COLOR_PALETTE.default,
       reverse: DARK_COLOR_PALETTE.reverse,
@@ -590,10 +591,9 @@ const darkTheme = createTheme(responsiveGlobalTheme, {
       blue: DARK_COLOR_PALETTE.blue,
       secondaryText: DARK_COLOR_PALETTE.light,
       danger: DARK_COLOR_PALETTE.red,
+      panel: DARK_COLOR_PALETTE.darker,
+      formOption: DARK_COLOR_PALETTE.darker,
     },
-    // primary: {
-    //   main: LIGHT_COLOR_PALETTE.reverse,
-    // },
   },
   components: {
     MuiTypography: {
@@ -693,7 +693,7 @@ const darkTheme = createTheme(responsiveGlobalTheme, {
 
             '&.Mui-disabled': {
               backgroundColor: DARK_COLOR_PALETTE.darker,
-              color: DARK_COLOR_PALETTE.lighter,
+              color: DARK_COLOR_PALETTE.darkerPlus,
             },
           },
           '&.MuiButton-outlined': {

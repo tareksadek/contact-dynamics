@@ -192,7 +192,7 @@ const Contacts: React.FC = () => {
   }
 
   return (
-    <Box minHeight="500px">
+    <Box pb={2}>
       <Controller
         name="searchTerm"
         control={control}
@@ -252,6 +252,7 @@ const Contacts: React.FC = () => {
             contact={selectedContact}
             open={isViewContactModalOpen}
             onClose={() => dispatch(closeMenu())}
+            onAddToContacts={handleDownloadVCard}
           />
 
           <EditContactModal

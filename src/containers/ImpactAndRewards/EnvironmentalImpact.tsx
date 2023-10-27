@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/reducers';
-import { Container, Grid } from '@mui/material';
+import { Box } from '@mui/material';
 import Impact from '../../components/ImpactAndRewards/Impact';
 import Rewards from '../../components/ImpactAndRewards/Rewards';
 
@@ -10,16 +10,16 @@ const EnvironmentalImpact: React.FC = () => {
   const appSetup = useSelector((state: RootState) => state.setup.setup);
 
   return (
-    <Container>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Impact visits={user?.visits || 0} />
-        </Grid>
-        <Grid item xs={12} md={6}>
+    <Box mb={2} p={2}>
+      <Box mb={2}>
+        <Impact visits={user?.visits || 0} />
+      </Box>
+      {appSetup && appSetup?.rewardsMilestones && appSetup?.rewardsMilestones.length > 0 && (
+        <Box mt={4}>
           <Rewards visits={user?.visits || 0} rewardsMilestones={appSetup?.rewardsMilestones || []} />
-        </Grid>
-      </Grid>
-    </Container>
+        </Box>
+      )}
+    </Box>
   );
 }
 

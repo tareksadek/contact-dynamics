@@ -87,15 +87,15 @@ const AboutForm: React.FC<AboutProps> = ({
                 InputProps={{
                   endAdornment: loadingData ? <CircularProgress size={20} /> : null
                 }}
-                helperText={`${field.value.length}/500`}
+                helperText={errors.about ? "Your biography must not exceed 500 characters." : `${field.value.length}/500`}
                 error={Boolean(errors.about)}
               />
             )}
           />
-
+{/* 
           <Typography color="error">
             {errors.about && "Your biography must not exceed 500 characters."}
-          </Typography>
+          </Typography> */}
         </Box>
       )}
 

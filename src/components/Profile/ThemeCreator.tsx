@@ -48,14 +48,22 @@ const ThemeCreator: React.FC<ThemeProps> = ({
   // const currentThemeColor = selectedTheme ? themeColor : (data ? dataThemeColor : defaultThemeColor);
   const currentColor = selectedColorCode || data.selectedColor.code || appDefaultColor.code
   const currentTheme = selectedTheme || theme || data.theme || appDefaultTheme
+  const currentThemeColor = currentTheme === 'dark' ? darkTheme.palette.background.default : lightTheme.palette.background.default
+  const currentReverseThemeColor = currentTheme === 'dark' ? lightTheme.palette.background.default  : darkTheme.palette.background.default
+
+  console.log(themeColor);
+  console.log(currentTheme);
+  
+  
 
   const layouts = [
     {
       name: 'default',
       icon: (
         <DefaultLayoutIcon
-          background={themeColor || defaultThemeColor}
-          selectedColor={selectedColorCode || appDefaultColor.code}
+          background={currentThemeColor || defaultThemeColor}
+          selectedColor={currentColor || appDefaultColor.code}
+          reverse={currentReverseThemeColor}
         />
       ),
       label: 'Default'
@@ -64,8 +72,9 @@ const ThemeCreator: React.FC<ThemeProps> = ({
       name: 'business',
       icon: (
         <BusinessLayoutIcon
-          background={themeColor || defaultThemeColor}
-          selectedColor={selectedColorCode || appDefaultColor.code}
+          background={currentThemeColor || defaultThemeColor}
+          selectedColor={currentColor || appDefaultColor.code}
+          reverse={currentReverseThemeColor}
         />
       ),
       label: 'Business'
@@ -74,8 +83,9 @@ const ThemeCreator: React.FC<ThemeProps> = ({
       name: 'card',
       icon: (
         <CardLayoutIcon
-          background={themeColor || defaultThemeColor}
-          selectedColor={selectedColorCode || appDefaultColor.code}
+          background={currentThemeColor || defaultThemeColor}
+          selectedColor={currentColor || appDefaultColor.code}
+          reverse={currentReverseThemeColor}
         />
       ),
       label: 'Card'
@@ -84,8 +94,9 @@ const ThemeCreator: React.FC<ThemeProps> = ({
       name: 'social',
       icon: (
         <SocialLayoutIcon
-          background={themeColor || defaultThemeColor}
-          selectedColor={selectedColorCode || appDefaultColor.code}
+          background={currentThemeColor || defaultThemeColor}
+          selectedColor={currentColor || appDefaultColor.code}
+          reverse={currentReverseThemeColor}
         />
       ),
       label: 'Social'

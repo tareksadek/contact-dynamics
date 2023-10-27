@@ -232,13 +232,10 @@ const CreateProfile: React.FC = () => {
     />
   };
 
-  console.log(getSteps());
-
-
   if (!isLoading) {
     return (
       <Box>
-        <Box pt={2}>
+        <Box pt={2} pb={2}>
           <Typography variant="h3" align="center">Create Your Digital Card</Typography>
           <Box mt={2} mb={3}>
             <Stepper activeStep={activeStep} alternativeLabel>

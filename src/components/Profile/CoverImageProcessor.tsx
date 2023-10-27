@@ -12,6 +12,7 @@ import { AppDispatch, RootState } from '../../store/reducers';
 import { layoutStyles } from '../../theme/layout';
 import { imageCropperStyles } from './styles';
 import { openModal, closeMenu } from '../../store/actions/modal';
+import { useConnectivity } from '../../contexts/ConnectivityContext';
 
 interface CoverImageProps {
   data: ImageType | null;
@@ -30,6 +31,7 @@ const CoverImageProcessor: React.FC<CoverImageProps> = ({
 }) => {
   const classes = imageCropperStyles()
   const layoutClasses = layoutStyles()
+  const isOnline = useConnectivity();
   const [temporaryImageData, setTemporaryImageData] = useState<string | null>(null);
   const [firstReadImageDimensions, setFirstReadImageDimensions] = useState<FirstReadImageDimensionsType>(null);
 
@@ -113,7 +115,7 @@ const CoverImageProcessor: React.FC<CoverImageProps> = ({
           </Box>
           <Box mt={2} width="100%">
             <Button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => !isOnline ? alert('Device is offline. You need to be online to change images.') : fileInputRef.current?.click()}
               variant="outlined"
               color="secondary"
               fullWidth
@@ -137,12 +139,14 @@ const CoverImageProcessor: React.FC<CoverImageProps> = ({
           flexDirection="column"
           mt={2}
         >
-          <Box onClick={() => fileInputRef.current?.click()}>
+          <Box 
+            onClick={() => !isOnline ? alert('Device is offline. You need to be online to change images.') : fileInputRef.current?.click()}
+          >
             <img src="/assets/images/coverImagePlaceholder.svg" alt="Cover placeholder" />
           </Box>
           <Box mt={2} width="100%">
             <Button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => !isOnline ? alert('Device is offline. You need to be online to change images.') : fileInputRef.current?.click()}
               variant="outlined"
               color="secondary"
               fullWidth

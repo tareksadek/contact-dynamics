@@ -155,38 +155,40 @@ export const fetchAllContactsFailure = (error: string): FetchAllContactsFailureA
 });
 
 export const addNewContact = (userId: string, profileId: string, contactData: ContactType) => async (dispatch: AppDispatch) => {
-  dispatch(startLoading('Adding contact...'));
+  // dispatch(startLoading('Adding contact...'));
   dispatch(addNewContactRequest());
   try {
     const response = await createContact(userId, profileId, contactData);
+    console.log(response);
+    
     if (response.success) {
       const data = response.data;
       data.createdOn = format(data.createdOn as Date, 'yyyy-MMM-dd');
       dispatch(addNewContactSuccess(data));
-      dispatch(stopLoading())
+      // dispatch(stopLoading())
       dispatch(setNotification({ message: 'Contact added successfully', type: 'success', horizontal: 'right', vertical: 'top' }));
     } else{
-      dispatch(stopLoading())
+      // dispatch(stopLoading())
       dispatch(addNewContactFailure(response.error));
       dispatch(setNotification({ message: 'Failed to add new contact', type: 'error', horizontal: 'right', vertical: 'top' }));
     }
   } catch (err){
-    dispatch(stopLoading())
+    // dispatch(stopLoading())
     dispatch(addNewContactFailure((err as Error).message));
     dispatch(setNotification({ message: 'Failed to add new contact', type: 'error', horizontal: 'right', vertical: 'top' }));
   }
 };
 
 export const deleteContact = (userId: string, profileId: string, contactId: string) => async (dispatch: AppDispatch) => {
-  dispatch(startLoading('Deleting contact...'));
+  // dispatch(startLoading('Deleting contact...'));
   dispatch(deleteContactRequest());
   try {
     await deleteContactById(userId, profileId, contactId);
     dispatch(deleteContactSuccess(contactId));
-    dispatch(stopLoading())
+    // dispatch(stopLoading())
     dispatch(setNotification({ message: 'Contact deleted successfully', type: 'success', horizontal: 'right', vertical: 'top' }));
   } catch (error) {
-    dispatch(stopLoading())
+    // dispatch(stopLoading())
     dispatch(deleteContactFailure((error as Error).message));
     dispatch(setNotification({ message: 'Failed to delete contact', type: 'error', horizontal: 'right', vertical: 'top' }));
   }
@@ -198,16 +200,16 @@ export const updateContact = (
   contactId: string,
   updatedData: Partial<ContactType>
 ) => async (dispatch: AppDispatch) => {
-  dispatch(startLoading('Updating contact...'));
+  // dispatch(startLoading('Updating contact...'));
   dispatch(updateContactRequest());
   try {
     await editContactById(userId, profileId, contactId, updatedData);
     updatedData.createdOn = format(updatedData.createdOn as Date, 'yyyy-MMM-dd');
     dispatch(updateContactSuccess({ ...updatedData, id: contactId } as ContactType));
-    dispatch(stopLoading())
+    // dispatch(stopLoading())
     dispatch(setNotification({ message: 'Contact updated successfully', type: 'success', horizontal: 'right', vertical: 'top' }));
   } catch (error) {
-    dispatch(stopLoading())
+    // dispatch(stopLoading())
     dispatch(updateContactFailure((error as Error).message));
     dispatch(setNotification({ message: 'Failed to update contact', type: 'error', horizontal: 'right', vertical: 'top' }));
   }

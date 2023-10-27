@@ -156,6 +156,7 @@ const UserContacts: React.FC = () => {
         contact={selectedContact}
         open={isViewContactModalOpen}
         onClose={() => dispatch(closeMenu())}
+        onAddToContacts={handleViewContact}
       />
     </div>
   );

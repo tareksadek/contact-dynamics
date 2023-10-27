@@ -1,13 +1,15 @@
 import React from 'react';
-import { Box, Typography, Paper, Icon } from '@mui/material';
-import EnergySavingsLeafIcon from '@mui/icons-material/EnergySavingsLeaf';
+import { Box, Typography } from '@mui/material';
+import { impactStyles } from './styles';
+import { layoutStyles } from '../../theme/layout';
 
 type ImpactProps = {
   visits: number;
 };
 
 const Impact: React.FC<ImpactProps> = ({ visits }) => {
-
+  const classes = impactStyles()
+  const layoutClasses = layoutStyles()
   const calculateGreenhouseGasesSaved = (visitsNumber: number) => {
     const gramsPerCard = 20;
     const gramsPerKilogram = 1000;
@@ -36,17 +38,47 @@ const Impact: React.FC<ImpactProps> = ({ visits }) => {
 
   return (
     <Box>
+      <Typography variant="body1">The environmental impact of using your digital card</Typography>
       {[
-        { title: 'Saved Cards', value: visits, icon: <EnergySavingsLeafIcon /> },
-        { title: 'Greenhouse Gases Reduced', value: calculateGreenhouseGasesSaved(visits), icon: <EnergySavingsLeafIcon /> },
-        { title: 'Trees Saved', value: calculateTreesSaved(visits), icon: <EnergySavingsLeafIcon /> },
-        { title: 'Water Saved', value: calculateWaterSaved(visits), icon: <EnergySavingsLeafIcon /> }
+        { title: 'Saved Cards', value: visits, icon: 'card.svg' },
+        { title: 'Greenhouse Gases Reduced', value: calculateGreenhouseGasesSaved(visits), icon: 'greenHouse.svg', unit: 'GMs' },
+        { title: 'Trees Saved', value: calculateTreesSaved(visits), icon: 'trees.svg' },
+        { title: 'Water Saved', value: calculateWaterSaved(visits), icon: 'water.svg', unit: 'Liters' }
       ].map((data, index) => (
-        <Paper key={index} style={{ padding: 15, marginBottom: 20 }}>
-          <Icon>{data.icon}</Icon>
-          <Typography variant="h6">{data.title}</Typography>
-          <Typography variant="h4">{data.value}</Typography>
-        </Paper>
+        <Box
+          key={index}
+          p={2}
+          mt={2}
+          className={layoutClasses.panel}
+        >
+          <Box
+            className={classes.impactSection}
+            p={1}
+            gap={4}
+            display="flex"
+            alignItems="center"
+            justifyContent="flex-start"
+          >
+            <Box>
+              <img src={`/assets/images/${data.icon}`} alt={data.title} />
+            </Box>
+            <Box
+              display="flex"
+              alignItems="flex-start"
+              justifyContent="center"
+              flexDirection="column"
+              className={classes.impactSectionData}
+            >
+              <Typography variant="body1">
+                {data.value}
+                {data.unit && (
+                  <span>{data.unit}</span>
+                )}
+              </Typography>
+              <Typography variant="body2">{data.title}</Typography>
+            </Box>
+          </Box>
+        </Box>
       ))}
     </Box>
   );

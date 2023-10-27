@@ -403,14 +403,14 @@ export const switchProfile = (userId: string, profileId: string) => async (dispa
 };
 
 export const updateBasicInfo = (userId: string, profileId: string, formData: BasicInfoFormDataTypes) => async (dispatch: any) => {
-  dispatch(startLoading('Saving profile data...'))
+  // dispatch(startLoading('Saving profile data...'))
   dispatch(updateBasicInfoRequest());
   
   try {
     const response = await updateProfileBasicInfo(userId, profileId, formData);
     if (response.success) {
       dispatch(updateBasicInfoSuccess(formData));
-      dispatch(stopLoading())
+      // dispatch(stopLoading())
       dispatch(setNotification({ message: 'Basic Info updated successfully', type: 'success', horizontal: 'right', vertical: 'top' }));
     } else {
       dispatch(stopLoading())
@@ -418,21 +418,22 @@ export const updateBasicInfo = (userId: string, profileId: string, formData: Bas
     }
   } catch (err) {
     console.log(err);
-    dispatch(stopLoading())
+    // dispatch(stopLoading())
     dispatch(updateBasicInfoFailure((err as Error).message));
     dispatch(setNotification({ message: 'Failed to update basic info', type: 'error', horizontal: 'right', vertical: 'top' }));
   }
 };
 
 export const updateAboutInfoData = (userId: string, profileId: string, formData: AboutFormDataTypes) => async (dispatch: any) => {
-  dispatch(startLoading('Saving about data...'))
+  // dispatch(startLoading('Saving about data...'))
   dispatch(updateAboutRequest());
   
   try {
     const response = await updateAboutInfo(userId, profileId, formData);
+    
     if (response.success) {
       dispatch(updateAboutSuccess(formData));
-      dispatch(stopLoading())
+      // dispatch(stopLoading())
       dispatch(setNotification({ message: 'About Info updated successfully', type: 'success', horizontal: 'right', vertical: 'top' }));
     } else {
       dispatch(stopLoading())
@@ -440,14 +441,14 @@ export const updateAboutInfoData = (userId: string, profileId: string, formData:
     }
   } catch (err) {
     console.log(err);
-    dispatch(stopLoading())
+    // dispatch(stopLoading())
     dispatch(updateAboutFailure((err as Error).message));
     dispatch(setNotification({ message: 'Failed to update about info', type: 'error', horizontal: 'right', vertical: 'top' }));
   }
 };
 
 export const updateContactFormData = (userId: string, profileId: string, formData: ContactFormType) => async (dispatch: any) => {
-  dispatch(startLoading('Saving form data...'))
+  // dispatch(startLoading('Saving form data...'))
   dispatch(updateAboutRequest());
   
   try {
@@ -457,26 +458,26 @@ export const updateContactFormData = (userId: string, profileId: string, formDat
       dispatch(stopLoading())
       dispatch(setNotification({ message: 'Form updated successfully', type: 'success', horizontal: 'right', vertical: 'top' }));
     } else {
-      dispatch(stopLoading())
+      // dispatch(stopLoading())
       throw new Error('Failed to update form');
     }
   } catch (err) {
     console.log(err);
-    dispatch(stopLoading())
+    // dispatch(stopLoading())
     dispatch(updateContactFormFailure((err as Error).message));
     dispatch(setNotification({ message: 'Failed to update form', type: 'error', horizontal: 'right', vertical: 'top' }));
   }
 };
 
 export const updateThemeSettingsData = (userId: string, profileId: string, themeSettings: ThemeSettingsType, favoriteColors: ColorType[]) => async (dispatch: any) => {
-  dispatch(startLoading('Updating theme...'))
+  // dispatch(startLoading('Updating theme...'))
   dispatch(updateThemeRequest());
   
   try {
     const response = await updateThemeSettings(userId, profileId, themeSettings, favoriteColors);
     if (response.success) {
       dispatch(updateThemeSuccess(themeSettings, favoriteColors));
-      dispatch(stopLoading())
+      // dispatch(stopLoading())
       dispatch(setNotification({ message: 'Theme updated successfully', type: 'success', horizontal: 'right', vertical: 'top' }));
     } else {
       dispatch(stopLoading())
@@ -484,7 +485,7 @@ export const updateThemeSettingsData = (userId: string, profileId: string, theme
     }
   } catch (err) {
     console.log(err);
-    dispatch(stopLoading())
+    // dispatch(stopLoading())
     dispatch(updateThemeFailure((err as Error).message));
     dispatch(setNotification({ message: 'Failed to update theme', type: 'error', horizontal: 'right', vertical: 'top' }));
   }
@@ -559,7 +560,7 @@ export const updateProfileImageData = (
 };
 
 export const updateProfileLinks = (userId: string, profileId: string, links: { social: LinkType[], custom: LinkType[] }) => async (dispatch: any) => {
-  dispatch(startLoading('Updating links...'));
+  // dispatch(startLoading('Updating links...'));
   dispatch(updateLinksRequest());
 
   try {
@@ -567,7 +568,7 @@ export const updateProfileLinks = (userId: string, profileId: string, links: { s
 
     if (response.success) {
       dispatch(updateLinksSuccess(links.social, links.custom));
-      dispatch(stopLoading());
+      // dispatch(stopLoading());
       dispatch(setNotification({ message: 'Links updated successfully', type: 'success', horizontal: 'right', vertical: 'top' }));
     } else {
       dispatch(stopLoading());
@@ -575,7 +576,7 @@ export const updateProfileLinks = (userId: string, profileId: string, links: { s
     }
   } catch (err) {
     console.log(err);
-    dispatch(stopLoading());
+    // dispatch(stopLoading());
     dispatch(updateLinksFailure((err as Error).message));
     dispatch(setNotification({ message: 'Failed to update links', type: 'error', horizontal: 'right', vertical: 'top' }));
   }

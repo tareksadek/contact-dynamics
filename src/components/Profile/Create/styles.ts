@@ -5,6 +5,8 @@ export const stepsStyles = makeStyles((theme: Theme) => ({
   stickyBox: {
     gap: theme.spacing(2),
     paddingBottom: theme.spacing(2),
+    backgroundColor: theme.palette.background.default,
+    zIndex: 2,
     '& button': {
       flex: 1,
     },

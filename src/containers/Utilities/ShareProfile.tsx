@@ -5,9 +5,11 @@ import { appDomain } from '../../setup/setup';
 import {
   Button,
   TextField,
-  Container,
   Typography,
+  Box,
+  Chip
 } from '@mui/material';
+import SignalWifiConnectedNoInternet4Icon from '@mui/icons-material/SignalWifiConnectedNoInternet4';
 import {
   EmailShareButton,
   FacebookShareButton,
@@ -20,9 +22,11 @@ import {
   TwitterIcon,
   WhatsappIcon,
 } from 'react-share';
+import { useTheme } from '@mui/material';
 
 const ShareProfile: React.FC = () => {
   const user = useSelector((state: RootState) => state.user.user);
+  const theme =  useTheme()
 
   const sharedLink = user && user.profileUrlSuffix ? `${appDomain}/${user.profileUrlSuffix}` : null;
 
@@ -34,54 +38,70 @@ const ShareProfile: React.FC = () => {
   };
 
   return (
-    <Container>
-      <Typography variant="h6" gutterBottom>
-        Share your profile
-      </Typography>
+    <Box p={2}>
+      <Box width="100%">
+        <Typography variant="body1">
+          Card URL
+        </Typography>
 
-      <TextField
-        value={sharedLink || ''}
-        fullWidth
-        variant="outlined"
-        onClick={handleCopyToClipboard}
-      />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleCopyToClipboard}
-        style={{ marginTop: '12px' }}
-      >
-        Copy Link to Clipboard
-      </Button>
+        <TextField
+          value={sharedLink || ''}
+          fullWidth
+          variant="outlined"
+          onClick={handleCopyToClipboard}
+        />
+        <Box mt={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCopyToClipboard}
+            fullWidth
+          >
+            Copy Link to Clipboard
+          </Button>
+        </Box>
+      </Box>
 
-      <Typography variant="subtitle1" gutterBottom>
-        Share via:
-      </Typography>
+      <Box mt={2}>
+        <Box
+          mb={1}
+          display="flex"
+          alignItems="center"
+          gap={1}
+        >
+          <Typography variant="body1">
+            Share
+          </Typography>
+          <Chip icon={<SignalWifiConnectedNoInternet4Icon />} size="small" label="Device Offline" style={{
+            background: theme.palette.background.danger
+          }} />
+        </Box>
 
-      {sharedLink && (
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <EmailShareButton url={sharedLink} subject="Check out my profile">
-            <EmailIcon size={32} round />
-          </EmailShareButton>
+        {sharedLink && (
+          <Box display="flex" alignItems="center" justifyContent="flex-start" gap={2}>
+            <EmailShareButton url={sharedLink} subject="Check out my profile">
+              <EmailIcon size={32} round />
+            </EmailShareButton>
 
-          <FacebookShareButton url={sharedLink}>
-            <FacebookIcon size={32} round />
-          </FacebookShareButton>
+            <FacebookShareButton url={sharedLink}>
+              <FacebookIcon size={32} round />
+            </FacebookShareButton>
 
-          <TwitterShareButton url={sharedLink} title="Check out my profile">
-            <TwitterIcon size={32} round />
-          </TwitterShareButton>
+            <TwitterShareButton url={sharedLink} title="Check out my profile">
+              <TwitterIcon size={32} round />
+            </TwitterShareButton>
 
-          <LinkedinShareButton url={sharedLink} title="Check out my profile">
-            <LinkedinIcon size={32} round />
-          </LinkedinShareButton>
+            <LinkedinShareButton url={sharedLink} title="Check out my profile">
+              <LinkedinIcon size={32} round />
+            </LinkedinShareButton>
 
-          <WhatsappShareButton url={sharedLink} title="Check out my profile">
-            <WhatsappIcon size={32} round />
-          </WhatsappShareButton>
-        </div>
-      )}
-    </Container>
+            <WhatsappShareButton url={sharedLink} title="Check out my profile">
+              <WhatsappIcon size={32} round />
+            </WhatsappShareButton>
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 };
 

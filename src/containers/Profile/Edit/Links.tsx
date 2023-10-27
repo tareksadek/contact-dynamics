@@ -14,6 +14,7 @@ import { RootState, AppDispatch } from '../../../store/reducers';
 import { useRegisterSubmit, SubmitContext } from '../../../contexts/SubmitContext';
 import { updateProfileLinks } from '../../../store/actions/profile';
 import { layoutStyles } from '../../../theme/layout';
+import SaveButton from '../../../Layout/SaveButton';
 
 const Links: React.FC = () => {
   const layoutClasses = layoutStyles()
@@ -45,8 +46,9 @@ const Links: React.FC = () => {
 
     if (linksChanged.socialLinksChanged || linksChanged.customLinksChanged) {
       dispatch(updateProfileLinks(authUser?.userId, user.activeProfileId, links))
+      setTimeout(() => setFormChanged(false), 3000)
     }
-  }, [authUser?.userId, user, links, checkIfLinksChanged, dispatch]);
+  }, [authUser?.userId, user, links, checkIfLinksChanged, dispatch, setFormChanged]);
 
   useEffect(() => {
     if (profile && profile.links) {
@@ -68,27 +70,34 @@ const Links: React.FC = () => {
   }, [checkIfLinksChanged, links, setFormChanged, setFormValid]);
 
   return (
-    <Box>
+    <Box p={2}>
       <LinksCreator
         setLinks={setLinks}
         links={links}
       />
-      <Box
-        className={layoutClasses.stickyBottomBox}
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Button
-          onClick={handleLinksSubmit}
-          fullWidth
-          variant="contained"
-          color="primary"
-          disabled={!formValid || !formChanged}
+      {/* {formChanged && ( */}
+        <Box
+          className={layoutClasses.stickyBottomBox}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
         >
-          Save
-        </Button>
-      </Box>
+          {/* <Button
+            onClick={handleLinksSubmit}
+            fullWidth
+            variant="contained"
+            color="primary"
+            disabled={!formValid || !formChanged}
+          >
+            Save
+          </Button> */}
+          <SaveButton
+            onClick={handleLinksSubmit}
+            text = "Save"
+            disabled={!formValid || !formChanged}
+          />
+        </Box>
+      {/* )} */}
     </Box>
   );
 }

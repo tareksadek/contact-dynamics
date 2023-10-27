@@ -285,7 +285,7 @@ const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
                                 />
                                 <Box ml={1}>
                                   <Typography variant="body1" align="left">
-                                    {truncateString(link.url, 30)}
+                                    {truncateString(link.url, 20)}
                                   </Typography>
                                 </Box>
                               </Box>
@@ -393,7 +393,7 @@ const LinksCreator: React.FC<LinksCreatorProps> = ({ links, setLinks }) => {
                                     </b>
                                   </Typography>
                                   <Typography variant="body1" align="left">
-                                    {truncateString(link.url, 30)}
+                                    {truncateString(link.url, 20)}
                                   </Typography>
                                 </Box>
                               </Box>
